@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -63,6 +64,34 @@ func run() int {
 		log.Error().Err(err).Str("role", cfg.Role).Msg("invalid node role specified")
 		return failure
 	}
+
+	// If we have a key, use path that corresponds to that key e.g. `.b7s_<peer-id>`.
+	nodeDir := ""
+	if cfg.Connectivity.PrivateKey != "" {
+		id, err := peerIDFromKey(cfg.Connectivity.PrivateKey)
+		if err != nil {
+			log.Error().Err(err).Str("key", cfg.Connectivity.PrivateKey).Msg("could not read private key")
+			return failure
+		}
+
+		nodeDir = generateNodeDirName(id)
+	} else {
+		nodeDir, err = os.MkdirTemp("", ".b7s_*")
+		if err != nil {
+			log.Error().Err(err).Msg("could not create node directory")
+			return failure
+		}
+	}
+
+	// Set relevant working paths for workspace, peerDB and functionDB.
+	// If paths were set using the CLI flags, use those. Else, use generated path, e.g. .b7s_<peer-id>/<default-option-for-directory>.
+	updateDirPaths(nodeDir, cfg)
+
+	log.Info().
+		Str("workspace", cfg.Workspace).
+		Str("peer_db", cfg.PeerDatabasePath).
+		Str("function_db", cfg.FunctionDatabasePath).
+		Msg("filepaths used by the node")
 
 	// Convert workspace path to an absolute one.
 	workspace, err := filepath.Abs(cfg.Workspace)
@@ -136,7 +165,8 @@ func run() int {
 		// Executor options.
 		execOptions := []executor.Option{
 			executor.WithWorkDir(cfg.Workspace),
-			executor.WithRuntimeDir(cfg.Worker.Runtime),
+			executor.WithRuntimeDir(cfg.Worker.RuntimePath),
+			executor.WithExecutableName(cfg.Worker.RuntimeCLI),
 		}
 
 		if needLimiter(cfg) {
@@ -162,7 +192,8 @@ func run() int {
 			log.Error().
 				Err(err).
 				Str("workspace", cfg.Workspace).
-				Str("runtime", cfg.Worker.Runtime).
+				Str("runtime_path", cfg.Worker.RuntimePath).
+				Str("runtime_cli", cfg.Worker.RuntimeCLI).
 				Msg("could not create an executor")
 			return failure
 		}
@@ -183,6 +214,11 @@ func run() int {
 
 	// Create function store.
 	fstore := fstore.New(log, functionStore, cfg.Workspace)
+
+	// If we have topics specified, use those.
+	if len(cfg.Topics) > 0 {
+		opts = append(opts, node.WithTopics(cfg.Topics))
+	}
 
 	// Instantiate node.
 	node, err := node.New(log, host, peerstore, fstore, opts...)
@@ -280,4 +316,29 @@ func run() int {
 
 func needLimiter(cfg *Config) bool {
 	return cfg.Worker.CPUPercentageLimit != 1.0 || cfg.Worker.MemoryLimitKB > 0
+}
+
+func updateDirPaths(root string, cfg *Config) {
+
+	workspace := cfg.Workspace
+	if workspace == "" {
+		workspace = filepath.Join(root, defaultWorkspace)
+	}
+	cfg.Workspace = workspace
+
+	peerDB := cfg.PeerDatabasePath
+	if peerDB == "" {
+		peerDB = filepath.Join(root, defaultPeerDB)
+	}
+	cfg.PeerDatabasePath = peerDB
+
+	functionDB := cfg.FunctionDatabasePath
+	if functionDB == "" {
+		functionDB = filepath.Join(root, defaultFunctionDB)
+	}
+	cfg.FunctionDatabasePath = functionDB
+}
+
+func generateNodeDirName(id string) string {
+	return fmt.Sprintf(".b7s_%s", id)
 }

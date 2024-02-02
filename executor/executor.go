@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -24,6 +25,10 @@ func New(log zerolog.Logger, options ...Option) (*Executor, error) {
 		option(&cfg)
 	}
 
+	if cfg.RuntimeDir == "" || cfg.ExecutableName == "" {
+		return nil, errors.New("runtime path and executable name are required")
+	}
+
 	// Convert the working directory to an absolute path too.
 	workdir, err := filepath.Abs(cfg.WorkDir)
 	if err != nil {
@@ -38,6 +43,9 @@ func New(log zerolog.Logger, options ...Option) (*Executor, error) {
 		return nil, fmt.Errorf("could not get absolute path for runtime (path: %s): %w", cfg.RuntimeDir, err)
 	}
 	cfg.RuntimeDir = runtime
+
+	// todo: fix for windows
+	cfg.DriversRootPath = cfg.RuntimeDir + "/extensions"
 
 	// Verify the runtime path is valid.
 	cliPath := filepath.Join(cfg.RuntimeDir, cfg.ExecutableName)

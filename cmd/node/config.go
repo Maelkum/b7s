@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/providers/posflag"
@@ -14,12 +15,12 @@ import (
 const (
 	defaultPort         = 0
 	defaultAddress      = "0.0.0.0"
+	defaultRole         = "worker"
 	defaultPeerDB       = "peer-db"
 	defaultFunctionDB   = "function-db"
 	defaultConcurrency  = uint(10)
 	defaultUseWebsocket = false
-
-	defaultRole = "worker"
+	defaultWorkspace    = ""
 )
 
 // Config describes the Blockless configuration options.
@@ -29,6 +30,7 @@ type Config struct {
 	BootNodes      []string `koanf:"boot-nodes"`
 	Workspace      string   `koanf:"workspace"`  // TODO: Check - does a head node ever use a workspace?
 	LoadAttributes bool     `koanf:"attributes"` // TODO: Head node probably doesn't need attributes..?
+	Topics         []string `koanf:"topics"`
 
 	PeerDatabasePath     string `koanf:"peer-db"`
 	FunctionDatabasePath string `koanf:"function-db"` // TODO: Head node doesn't need a function database.
@@ -50,6 +52,7 @@ const (
 	flagAttributes  = "attributes"
 	flagPeerDB      = "peer-db"
 	flagFunctionDB  = "function-db"
+	flagTopics      = "topics"
 	// Connectivity
 	flagAddress               = "address"
 	flagPort                  = "port"
@@ -62,7 +65,8 @@ const (
 	// Head
 	flagRestAPI = "rest-api"
 	// Worker
-	flagRuntime     = "runtime"
+	flagRuntimePath = "runtime-path"
+	flagRuntimeCLI  = "runtime-cli"
 	flagCPULimit    = "cpu-percentage-limit"
 	flagMemoryLimit = "memory-limit"
 	// Log
@@ -80,10 +84,11 @@ func loadConfig() (*Config, error) {
 	fs.StringP(flagRole, "r", defaultRole, "role this note will have in the Blockless protocol (head or worker)")
 	fs.UintP(flagConcurrency, "c", defaultConcurrency, "maximum number of requests node will process in parallel")
 	fs.StringSlice(flagBootNodes, nil, "list of addresses that this node will connect to on startup, in multiaddr format")
-	fs.String(flagWorkspace, "./workspace", "directory that the node can use for file storage")
+	fs.String(flagWorkspace, defaultWorkspace, "directory that the node can use for file storage")
 	fs.Bool(flagAttributes, false, "node should try to load its attribute data from IPFS")
 	fs.String(flagPeerDB, defaultPeerDB, "path to the database used for persisting peer data")
 	fs.String(flagFunctionDB, defaultFunctionDB, "path to the database used for persisting function data")
+	fs.StringSlice(flagTopics, nil, "topics node should subscribe to")
 
 	fs.StringP(flagLogLevel, "l", "info", "log level to use")
 
@@ -101,7 +106,8 @@ func loadConfig() (*Config, error) {
 	fs.String(flagRestAPI, "", "address where the head node REST API will listen on")
 
 	// Worker node flags.
-	fs.String(flagRuntime, "", "Blockless Runtime location (used by the worker node)")
+	fs.String(flagRuntimePath, "", "Blockless Runtime location (used by the worker node)")
+	fs.String(flagRuntimeCLI, blockless.RuntimeCLI(), "runtime CLI name (used by the worker node)")
 	fs.Float64(flagCPULimit, 1, "amount of CPU time allowed for Blockless Functions in the 0-1 range, 1 being unlimited")
 	fs.Int64(flagMemoryLimit, 0, "memory limit (kB) for Blockless Functions")
 
@@ -169,7 +175,7 @@ func flagTranslate(fs *pflag.FlagSet, delimiter string) func(*pflag.Flag) (strin
 			return skey, val
 
 		// Worker node flags:
-		case flagRuntime, flagCPULimit, flagMemoryLimit:
+		case flagRuntimePath, flagRuntimeCLI, flagCPULimit, flagMemoryLimit:
 			skey := "worker" + delimiter + key
 			return skey, val
 
@@ -203,7 +209,8 @@ type Head struct {
 }
 
 type Worker struct {
-	Runtime            string  `koanf:"runtime"`
+	RuntimePath        string  `koanf:"runtime-path"`
+	RuntimeCLI         string  `koanf:"runtime-cli"`
 	CPUPercentageLimit float64 `koanf:"cpu-percentage-limit"`
 	MemoryLimitKB      int64   `koanf:"memory-limit"`
 }
