@@ -20,7 +20,7 @@ const (
 	defaultFunctionDB   = "function-db"
 	defaultConcurrency  = uint(10)
 	defaultUseWebsocket = false
-	defaultWorkspace    = ""
+	defaultWorkspace    = "workspace"
 )
 
 // Config describes the Blockless configuration options.
@@ -84,10 +84,10 @@ func loadConfig() (*Config, error) {
 	fs.StringP(flagRole, "r", defaultRole, "role this note will have in the Blockless protocol (head or worker)")
 	fs.UintP(flagConcurrency, "c", defaultConcurrency, "maximum number of requests node will process in parallel")
 	fs.StringSlice(flagBootNodes, nil, "list of addresses that this node will connect to on startup, in multiaddr format")
-	fs.String(flagWorkspace, defaultWorkspace, "directory that the node can use for file storage")
+	fs.String(flagWorkspace, "", "directory that the node can use for file storage")
 	fs.Bool(flagAttributes, false, "node should try to load its attribute data from IPFS")
-	fs.String(flagPeerDB, defaultPeerDB, "path to the database used for persisting peer data")
-	fs.String(flagFunctionDB, defaultFunctionDB, "path to the database used for persisting function data")
+	fs.String(flagPeerDB, "", "path to the database used for persisting peer data")
+	fs.String(flagFunctionDB, "", "path to the database used for persisting function data")
 	fs.StringSlice(flagTopics, nil, "topics node should subscribe to")
 
 	fs.StringP(flagLogLevel, "l", "info", "log level to use")
