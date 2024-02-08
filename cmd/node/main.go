@@ -9,6 +9,9 @@ import (
 	"os/signal"
 	"path/filepath"
 
+	limits2 "github.com/Maelkum/overseer/limits"
+	"github.com/Maelkum/overseer/overseer"
+
 	"github.com/cockroachdb/pebble"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
@@ -186,8 +189,31 @@ func run() int {
 			execOptions = append(execOptions, executor.WithLimiter(limiter))
 		}
 
+		// TODO: Multiple levels of limits: overall limits + per-job limits.
+		// TODO: The limiter should be optional?
+		// TODO: Load stuff from config.
+		limiter2, err := limits2.New(log, limits2.DefaultMountpoint, "/overseer")
+		if err != nil {
+			log.Error().Err(err).Msg("could not create overseer limiter")
+			return failure
+		}
+
+		runtime := filepath.Join(cfg.Worker.RuntimePath, cfg.Worker.RuntimeCLI)
+		ov, err := overseer.New(
+			log.With().Str("component", "overseer").Logger(),
+			limiter2,
+			overseer.WithAllowlist([]string{runtime}),
+		)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("runtime", runtime).
+				Msg("could not create overseer")
+			return failure
+		}
+
 		// Create an executor.
-		executor, err := executor.New(log, execOptions...)
+		executor, err := executor.New(log, ov, execOptions...)
 		if err != nil {
 			log.Error().
 				Err(err).

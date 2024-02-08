@@ -13,12 +13,13 @@ import (
 
 // Executor provides the capabilities to run external applications.
 type Executor struct {
-	log zerolog.Logger
-	cfg Config
+	log      zerolog.Logger
+	overseer Overseer
+	cfg      Config
 }
 
 // New creates a new Executor with the specified working directory.
-func New(log zerolog.Logger, options ...Option) (*Executor, error) {
+func New(log zerolog.Logger, overseer Overseer, options ...Option) (*Executor, error) {
 
 	cfg := defaultConfig
 	for _, option := range options {
@@ -55,8 +56,9 @@ func New(log zerolog.Logger, options ...Option) (*Executor, error) {
 	}
 
 	e := Executor{
-		log: log.With().Str("component", "executor").Logger(),
-		cfg: cfg,
+		log:      log.With().Str("component", "executor").Logger(),
+		overseer: overseer,
+		cfg:      cfg,
 	}
 
 	return &e, nil
