@@ -13,20 +13,15 @@ import (
 )
 
 // createJob will translate the execution request to a job specification.
-func (e *Executor) createJob(paths requestPaths, req execute.Request) job.Job {
-
-	cfg := req.Config.Runtime
-	cfg.Input = paths.input
-	cfg.FSRoot = paths.fsRoot
-	cfg.DriversRootPath = e.cfg.DriversRootPath
+func (e *Executor) createJob(workdir string, req execute.Request) job.Job {
 
 	// Prepare CLI arguments.
-	// Append the input argument first first.
+	// Append the input argument first.
 	var args []string
-	args = append(args, cfg.Input)
+	args = append(args, req.Config.Runtime.Input)
 
 	// Append the arguments for the runtime.
-	runtimeFlags := runtimeFlags(cfg, req.Config.Permissions)
+	runtimeFlags := runtimeFlags(req.Config.Runtime, req.Config.Permissions)
 	args = append(args, runtimeFlags...)
 
 	// Separate runtime arguments from the function arguments.
@@ -66,7 +61,7 @@ func (e *Executor) createJob(paths requestPaths, req execute.Request) job.Job {
 
 	job := job.Job{
 		Exec: job.Command{
-			WorkDir: paths.workdir,
+			WorkDir: workdir,
 			// TODO: Add support for different runtimes/binaries to execute.
 			Path: filepath.Join(e.cfg.RuntimeDir, e.cfg.ExecutableName),
 			Args: args,

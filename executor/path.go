@@ -2,24 +2,17 @@ package executor
 
 import (
 	"path/filepath"
+
+	"github.com/blocklessnetwork/b7s/models/execute"
 )
 
-// requestPaths defines a number of path components relevant to a request.
-type requestPaths struct {
-	workdir string
-	fsRoot  string
-	input   string
+func (e *Executor) workdirPath(requestID string) string {
+	return filepath.Join(e.cfg.WorkDir, "t", requestID)
 }
+func (e *Executor) setRequestPaths(requestID string, req *execute.Request) {
 
-func (e *Executor) generateRequestPaths(requestID string, functionID string, method string) requestPaths {
-
-	// Workdir Should be the root for all other paths.
-	workdir := filepath.Join(e.cfg.WorkDir, "t", requestID)
-	paths := requestPaths{
-		workdir: workdir,
-		fsRoot:  filepath.Join(workdir, "fs"),
-		input:   filepath.Join(e.cfg.WorkDir, functionID, method),
-	}
-
-	return paths
+	workdir := e.workdirPath(requestID)
+	req.Config.Runtime.FSRoot = filepath.Join(workdir, "fs")
+	req.Config.Runtime.Input = filepath.Join(e.cfg.WorkDir, req.FunctionID, req.Method)
+	req.Config.Runtime.DriversRootPath = e.cfg.DriversRootPath
 }

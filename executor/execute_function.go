@@ -42,36 +42,40 @@ func (e *Executor) executeFunction(requestID string, req execute.Request) (execu
 
 	log.Info().Msg("processing execution request")
 
-	// Generate paths for execution request.
-	paths := e.generateRequestPaths(requestID, req.FunctionID, req.Method)
+	// Set paths for execution request.
+	e.setRequestPaths(requestID, &req)
 
-	err := e.cfg.FS.MkdirAll(paths.workdir, defaultPermissions)
+	workdir := e.workdirPath(requestID)
+	err := e.cfg.FS.MkdirAll(workdir, defaultPermissions)
 	if err != nil {
-		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not setup working directory for execution (dir: %s): %w", paths.workdir, err)
+		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not setup working directory for execution (dir: %s): %w", workdir, err)
 	}
 	// Remove all temporary files after we're done.
 	defer func() {
-		err := e.cfg.FS.RemoveAll(paths.workdir)
+		err := e.cfg.FS.RemoveAll(workdir)
 		if err != nil {
-			log.Error().Err(err).Str("dir", paths.workdir).Msg("could not remove request working directory")
+			log.Error().Err(err).Str("dir", workdir).Msg("could not remove request working directory")
 		}
 	}()
 
-	log.Debug().Str("dir", paths.workdir).Msg("working directory for the request")
+	log.Debug().Str("dir", workdir).Msg("working directory for the request")
 
-	out, usage, err := e.executeWithOverseer(requestID, paths, req)
+	out, usage, err := e.executeWithOverseer(requestID, workdir, req)
 	if err != nil {
-		return out, execute.Usage{}, fmt.Errorf("command execution failed: %w", err)
+		return out, usage, fmt.Errorf("command execution failed: %w", err)
 	}
 
 	log.Info().Msg("command executed successfully")
 
+	// TODO: Don't log output, temporary.
+	log.Debug().Interface("outut", out).Interface("resource_usage", usage).Msg("overseer returned command output")
+
 	return out, usage, nil
 }
 
-func (e *Executor) executeWithOverseer(requestID string, paths requestPaths, req execute.Request) (execute.RuntimeOutput, execute.Usage, error) {
+func (e *Executor) executeWithOverseer(requestID string, workdir string, req execute.Request) (execute.RuntimeOutput, execute.Usage, error) {
 
-	job := e.createJob(paths, req)
+	job := e.createJob(workdir, req)
 
 	e.log.Debug().Interface("job", job).Str("request", requestID).Msg("job created")
 	state, err := e.overseer.Run(job)
