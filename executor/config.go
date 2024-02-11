@@ -24,6 +24,7 @@ type Config struct {
 	DriversRootPath string   // where are cgi drivers stored
 	FS              afero.Fs // FS accessor
 	Limiter         Limiter  // Resource limiter for executed processes
+	Overseer        Overseer // Overseer for the enhanced runner
 }
 
 type Option func(*Config)
@@ -60,5 +61,11 @@ func WithExecutableName(name string) Option {
 func WithLimiter(limiter Limiter) Option {
 	return func(cfg *Config) {
 		cfg.Limiter = limiter
+	}
+}
+
+func WithOverseer(ov Overseer) Option {
+	return func(cfg *Config) {
+		cfg.Overseer = ov
 	}
 }

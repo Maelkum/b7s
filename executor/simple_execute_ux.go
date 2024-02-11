@@ -14,7 +14,7 @@ import (
 )
 
 // executeCommand on non-windows systems is pretty straightforward and equivalent to the ordinary `cmd.Run()` or `cmd.Output`.
-func (e *Executor) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute.Usage, error) {
+func (s *simpleRunner) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute.Usage, error) {
 
 	var (
 		stdout bytes.Buffer
@@ -33,7 +33,7 @@ func (e *Executor) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute
 	proc := execute.ProcessID{
 		PID: cmd.Process.Pid,
 	}
-	err = e.cfg.Limiter.LimitProcess(proc)
+	err = s.limiter.LimitProcess(proc)
 	if err != nil {
 		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not set resource limits: %w", err)
 	}

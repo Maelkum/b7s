@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
+	"os/exec"
 	"strings"
 
 	"github.com/Maelkum/overseer/job"
@@ -13,7 +13,47 @@ import (
 )
 
 // createJob will translate the execution request to a job specification.
-func (e *Executor) createJob(workdir string, req execute.Request) job.Job {
+func createJob(runtime string, req execute.Request) job.Job {
+
+	// Setup stdin of the command.
+	var stdin io.Reader
+	if req.Config.Stdin != nil {
+		stdin = strings.NewReader(*req.Config.Stdin)
+	}
+
+	job := job.Job{
+		Exec: job.Command{
+			WorkDir: req.Config.Runtime.Workdir,
+			Path:    runtime,
+			Args:    createArgs(req),
+			Env:     createEnv(req),
+		},
+		Stdin: stdin,
+	}
+
+	return job
+}
+
+// createCmd will translate the execution request to a Cmd struct.
+func createCmd(runtime string, req execute.Request) *exec.Cmd {
+
+	// Setup stdin of the command.
+	var stdin io.Reader
+	if req.Config.Stdin != nil {
+		stdin = strings.NewReader(*req.Config.Stdin)
+	}
+
+	args := createArgs(req)
+
+	cmd := exec.Command(runtime, args...)
+	cmd.Dir = req.Config.Runtime.Workdir
+	cmd.Env = createEnv(req)
+	cmd.Stdin = stdin
+
+	return cmd
+}
+
+func createArgs(req execute.Request) []string {
 
 	// Prepare CLI arguments.
 	// Append the input argument first.
@@ -34,11 +74,10 @@ func (e *Executor) createJob(workdir string, req execute.Request) job.Job {
 		}
 	}
 
-	// Setup stdin of the command.
-	var stdin io.Reader
-	if req.Config.Stdin != nil {
-		stdin = strings.NewReader(*req.Config.Stdin)
-	}
+	return args
+}
+
+func createEnv(req execute.Request) []string {
 
 	// Setup environment.
 	// First, pass through our environment variables.
@@ -59,16 +98,5 @@ func (e *Executor) createJob(workdir string, req execute.Request) job.Job {
 	blsEnv := fmt.Sprintf("%s=%s", blsListEnvName, blsList)
 	environ = append(environ, blsEnv)
 
-	job := job.Job{
-		Exec: job.Command{
-			WorkDir: workdir,
-			// TODO: Add support for different runtimes/binaries to execute.
-			Path: filepath.Join(e.cfg.RuntimeDir, e.cfg.ExecutableName),
-			Args: args,
-			Env:  environ,
-		},
-		Stdin: stdin,
-	}
-
-	return job
+	return environ
 }

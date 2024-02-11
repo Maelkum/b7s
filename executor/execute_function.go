@@ -2,6 +2,7 @@ package executor
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/blocklessnetwork/b7s/models/codes"
 	"github.com/blocklessnetwork/b7s/models/execute"
@@ -45,7 +46,7 @@ func (e *Executor) executeFunction(requestID string, req execute.Request) (execu
 	// Set paths for execution request.
 	e.setRequestPaths(requestID, &req)
 
-	workdir := e.workdirPath(requestID)
+	workdir := req.Config.Runtime.Workdir
 	err := e.cfg.FS.MkdirAll(workdir, defaultPermissions)
 	if err != nil {
 		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not setup working directory for execution (dir: %s): %w", workdir, err)
@@ -60,44 +61,22 @@ func (e *Executor) executeFunction(requestID string, req execute.Request) (execu
 
 	log.Debug().Str("dir", workdir).Msg("working directory for the request")
 
-	out, usage, err := e.executeWithOverseer(requestID, workdir, req)
+	// TODO: Add support for different runtimes/binaries to execute.
+	runtime := filepath.Join(e.cfg.RuntimeDir, e.cfg.ExecutableName)
+
+	var runner Runner
+	if e.useEnhancedRunner {
+		runner = e.newEnhancedRunner()
+	} else {
+		runner = e.newSimpleRunner()
+	}
+
+	out, usage, err := runner.Run(requestID, runtime, req)
 	if err != nil {
 		return out, usage, fmt.Errorf("command execution failed: %w", err)
 	}
 
 	log.Info().Msg("command executed successfully")
-
-	// TODO: Don't log output, temporary.
-	log.Debug().Interface("outut", out).Interface("resource_usage", usage).Msg("overseer returned command output")
-
-	return out, usage, nil
-}
-
-func (e *Executor) executeWithOverseer(requestID string, workdir string, req execute.Request) (execute.RuntimeOutput, execute.Usage, error) {
-
-	job := e.createJob(workdir, req)
-
-	e.log.Debug().Interface("job", job).Str("request", requestID).Msg("job created")
-	state, err := e.overseer.Run(job)
-	if err != nil {
-		// TODO: always return values here
-		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("job run failed: %w", err)
-	}
-
-	out := execute.RuntimeOutput{
-		Stdout: state.Stdout,
-		Stderr: state.Stderr,
-	}
-
-	// This should always be the case in the case where we `run` since we've waited for the process.
-	if state.ExitCode != nil {
-		out.ExitCode = *state.ExitCode
-	} else {
-		e.log.Warn().Str("request", requestID).Msg("exit code missing for executed process")
-	}
-
-	// TODO: (overseer) Collect usage info.
-	usage := execute.Usage{}
 
 	return out, usage, nil
 }

@@ -24,7 +24,7 @@ import (
 // `DuplicateHandle“ syscall. With this duplicated handle, we'll be able to access all the info we need.
 // Additionally, the `DuplicateHandle` syscall will fail if we do anything wrong, so it will also act as a
 // validation layer.
-func (e *Executor) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute.Usage, error) {
+func (s *SimpleRunner) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute.Usage, error) {
 
 	var (
 		stdout bytes.Buffer
@@ -70,7 +70,7 @@ func (e *Executor) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, execute
 		PID:    cmd.Process.Pid,
 		Handle: uintptr(handle),
 	}
-	err = e.cfg.Limiter.LimitProcess(proc)
+	err = s.limiter.LimitProcess(proc)
 	if err != nil {
 		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not set resource limits: %w", err)
 	}

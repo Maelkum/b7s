@@ -16,6 +16,8 @@ type Executor struct {
 	log      zerolog.Logger
 	overseer Overseer
 	cfg      Config
+
+	useEnhancedRunner bool
 }
 
 // New creates a new Executor with the specified working directory.
@@ -60,6 +62,9 @@ func New(log zerolog.Logger, overseer Overseer, options ...Option) (*Executor, e
 		overseer: overseer,
 		cfg:      cfg,
 	}
+
+	// If we have an overseer, use an enhanced runner for executions.
+	e.useEnhancedRunner = e.cfg.Overseer != nil
 
 	return &e, nil
 }
