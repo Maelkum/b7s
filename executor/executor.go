@@ -13,15 +13,14 @@ import (
 
 // Executor provides the capabilities to run external applications.
 type Executor struct {
-	log      zerolog.Logger
-	overseer Overseer
-	cfg      Config
+	log zerolog.Logger
+	cfg Config
 
 	useEnhancedRunner bool
 }
 
 // New creates a new Executor with the specified working directory.
-func New(log zerolog.Logger, overseer Overseer, options ...Option) (*Executor, error) {
+func New(log zerolog.Logger, options ...Option) (*Executor, error) {
 
 	cfg := defaultConfig
 	for _, option := range options {
@@ -47,8 +46,7 @@ func New(log zerolog.Logger, overseer Overseer, options ...Option) (*Executor, e
 	}
 	cfg.RuntimeDir = runtime
 
-	// todo: fix for windows
-	cfg.DriversRootPath = cfg.RuntimeDir + "/extensions"
+	cfg.DriversRootPath = filepath.Join(cfg.RuntimeDir, "extensions")
 
 	// Verify the runtime path is valid.
 	cliPath := filepath.Join(cfg.RuntimeDir, cfg.ExecutableName)
@@ -58,9 +56,8 @@ func New(log zerolog.Logger, overseer Overseer, options ...Option) (*Executor, e
 	}
 
 	e := Executor{
-		log:      log.With().Str("component", "executor").Logger(),
-		overseer: overseer,
-		cfg:      cfg,
+		log: log.With().Str("component", "executor").Logger(),
+		cfg: cfg,
 	}
 
 	// If we have an overseer, use an enhanced runner for executions.
