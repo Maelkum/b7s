@@ -181,7 +181,10 @@ func run() int {
 
 			if cfg.Worker.EnableJobLimits {
 
-				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless")
+				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless",
+					limits.WithCPUPercentage(cfg.Worker.CPUPercentageLimit),
+					limits.WithMemoryKB(cfg.Worker.MemoryLimitKB),
+				)
 				if err != nil {
 					log.Error().Err(err).Msg("could not create overseer limiter")
 					return failure
@@ -204,7 +207,9 @@ func run() int {
 			// We're using the vanilla executor.
 			if needExecutorLimiter(cfg) {
 				// TODO: Move cgroup name to config.
-				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless")
+				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless",
+					limits.WithCPUPercentage(cfg.Worker.CPUPercentageLimit),
+					limits.WithMemoryKB(cfg.Worker.MemoryLimitKB))
 				if err != nil {
 					log.Error().Err(err).Msg("could not create limiter")
 					return failure
