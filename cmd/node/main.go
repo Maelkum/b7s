@@ -174,6 +174,8 @@ func run() int {
 		var limiter *limits.Limiter
 		if cfg.Worker.EnhancedRunner {
 
+			log.Debug().Msg("using an enhanced runner")
+
 			runtime := filepath.Join(cfg.Worker.RuntimePath, cfg.Worker.RuntimeCLI)
 			overseerOptions := []overseer.Option{
 				overseer.WithAllowlist([]string{runtime}),
@@ -204,6 +206,9 @@ func run() int {
 
 			execOptions = append(execOptions, executor.WithOverseer(ov))
 		} else {
+
+			log.Debug().Msg("using a vanilla executor")
+
 			// We're using the vanilla executor.
 			if needExecutorLimiter(cfg) {
 				// TODO: Move cgroup name to config.
