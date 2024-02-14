@@ -7,15 +7,17 @@ import (
 )
 
 type simpleRunner struct {
-	log     zerolog.Logger
-	limiter Limiter
+	log        zerolog.Logger
+	useLimiter bool
+	limiter    Limiter
 }
 
 func (e *Executor) newSimpleRunner() *simpleRunner {
 
 	sr := simpleRunner{
-		log:     e.log,
-		limiter: e.cfg.Limiter,
+		log:        e.log,
+		useLimiter: e.cfg.useLimiter,
+		limiter:    e.cfg.Limiter,
 	}
 	return &sr
 }

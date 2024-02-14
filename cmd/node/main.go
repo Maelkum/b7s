@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 
-	limits2 "github.com/Maelkum/overseer/limits"
+	"github.com/Maelkum/overseer/limits"
 	"github.com/Maelkum/overseer/overseer"
 
 	"github.com/cockroachdb/pebble"
@@ -19,7 +19,6 @@ import (
 
 	"github.com/blocklessnetwork/b7s/api"
 	"github.com/blocklessnetwork/b7s/executor"
-	"github.com/blocklessnetwork/b7s/executor/limits"
 	"github.com/blocklessnetwork/b7s/fstore"
 	"github.com/blocklessnetwork/b7s/host"
 	"github.com/blocklessnetwork/b7s/models/blockless"
@@ -172,39 +171,28 @@ func run() int {
 			executor.WithExecutableName(cfg.Worker.RuntimeCLI),
 		}
 
-		if needLimiter(cfg) {
-			limiter, err := limits.New(limits.WithCPUPercentage(cfg.Worker.CPUPercentageLimit), limits.WithMemoryKB(cfg.Worker.MemoryLimitKB))
-			if err != nil {
-				log.Error().Err(err).Msg("could not create resource limiter")
-				return failure
-			}
-
-			defer func() {
-				err = limiter.Shutdown()
-				if err != nil {
-					log.Error().Err(err).Msg("could not shutdown resource limiter")
-				}
-			}()
-
-			execOptions = append(execOptions, executor.WithLimiter(limiter))
-		}
-
+		var limiter *limits.Limiter
 		if cfg.Worker.EnhancedRunner {
 
-			// TODO: Multiple levels of limits: overall limits + per-job limits.
-			// TODO: The limiter should be optional?
-			// TODO: Load stuff from config.
-			limiter2, err := limits2.New(log, limits2.DefaultMountpoint, "/overseer")
-			if err != nil {
-				log.Error().Err(err).Msg("could not create overseer limiter")
-				return failure
+			runtime := filepath.Join(cfg.Worker.RuntimePath, cfg.Worker.RuntimeCLI)
+			overseerOptions := []overseer.Option{
+				overseer.WithAllowlist([]string{runtime}),
 			}
 
-			runtime := filepath.Join(cfg.Worker.RuntimePath, cfg.Worker.RuntimeCLI)
+			if cfg.Worker.EnableJobLimits {
+
+				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless")
+				if err != nil {
+					log.Error().Err(err).Msg("could not create overseer limiter")
+					return failure
+				}
+
+				overseerOptions = append(overseerOptions, overseer.WithLimiter(limiter))
+			}
+
 			ov, err := overseer.New(
 				log.With().Str("component", "overseer").Logger(),
-				limiter2,
-				overseer.WithAllowlist([]string{runtime}),
+				overseerOptions...,
 			)
 			if err != nil {
 				log.Error().Err(err).Str("runtime", runtime).Msg("could not create overseer")
@@ -212,7 +200,26 @@ func run() int {
 			}
 
 			execOptions = append(execOptions, executor.WithOverseer(ov))
+		} else {
+			// We're using the vanilla executor.
+			if needExecutorLimiter(cfg) {
+				// TODO: Move cgroup name to config.
+				limiter, err := limits.New(log, limits.DefaultMountpoint, "/blockless")
+				if err != nil {
+					log.Error().Err(err).Msg("could not create limiter")
+					return failure
+				}
+				execOptions = append(execOptions, executor.WithLimiter(limiter))
+			}
 		}
+
+		// Defer shutdown if we created a limiter.
+		defer func() {
+			err := limiter.Shutdown()
+			if err != nil {
+				log.Error().Err(err).Msg("could not shutdown limiter")
+			}
+		}()
 
 		// Create an executor.
 		executor, err := executor.New(log, execOptions...)
@@ -342,7 +349,7 @@ func run() int {
 	return success
 }
 
-func needLimiter(cfg *Config) bool {
+func needExecutorLimiter(cfg *Config) bool {
 	return cfg.Worker.CPUPercentageLimit != 1.0 || cfg.Worker.MemoryLimitKB > 0
 }
 

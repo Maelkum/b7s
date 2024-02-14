@@ -12,7 +12,6 @@ var defaultConfig = Config{
 	RuntimeDir:      "",
 	ExecutableName:  blockless.RuntimeCLI(),
 	FS:              afero.NewOsFs(),
-	Limiter:         &noopLimiter{},
 	DriversRootPath: "",
 }
 
@@ -24,6 +23,7 @@ type Config struct {
 	DriversRootPath string   // where are cgi drivers stored
 	FS              afero.Fs // FS accessor
 	Limiter         Limiter  // Resource limiter for executed processes
+	useLimiter      bool
 	Overseer        Overseer // Overseer for the enhanced runner
 }
 
@@ -61,6 +61,7 @@ func WithExecutableName(name string) Option {
 func WithLimiter(limiter Limiter) Option {
 	return func(cfg *Config) {
 		cfg.Limiter = limiter
+		cfg.useLimiter = true
 	}
 }
 

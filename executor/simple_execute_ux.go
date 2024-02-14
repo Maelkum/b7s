@@ -33,9 +33,11 @@ func (s *simpleRunner) executeCommand(cmd *exec.Cmd) (execute.RuntimeOutput, exe
 	proc := execute.ProcessID{
 		PID: cmd.Process.Pid,
 	}
-	err = s.limiter.LimitProcess(proc)
-	if err != nil {
-		return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not set resource limits: %w", err)
+	if s.useLimiter {
+		err = s.limiter.AssignToGroup("", uint64(proc.PID))
+		if err != nil {
+			return execute.RuntimeOutput{}, execute.Usage{}, fmt.Errorf("could not set resource limits: %w", err)
+		}
 	}
 
 	// Return execution error with as much info below.

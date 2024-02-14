@@ -65,11 +65,12 @@ const (
 	// Head
 	flagRestAPI = "rest-api"
 	// Worker
-	flagRuntimePath    = "runtime-path"
-	flagRuntimeCLI     = "runtime-cli"
-	flagCPULimit       = "cpu-percentage-limit"
-	flagMemoryLimit    = "memory-limit"
-	flagEnhancedRunner = "enhanced-runner"
+	flagRuntimePath     = "runtime-path"
+	flagRuntimeCLI      = "runtime-cli"
+	flagCPULimit        = "cpu-percentage-limit"
+	flagMemoryLimit     = "memory-limit"
+	flagEnhancedRunner  = "enhanced-runner"
+	flagEnableJobLimits = "enable-job-limits"
 	// Log
 	flagLogLevel = "log-level"
 )
@@ -112,6 +113,7 @@ func loadConfig() (*Config, error) {
 	fs.Float64(flagCPULimit, 1, "amount of CPU time allowed for Blockless Functions in the 0-1 range, 1 being unlimited")
 	fs.Int64(flagMemoryLimit, 0, "memory limit (kB) for Blockless Functions")
 	fs.Bool(flagEnhancedRunner, false, "use enhanced runner for executing jobs")
+	fs.Bool(flagEnableJobLimits, false, "enable setting resource limits on a per-job basis")
 
 	fs.SortFlags = false
 	fs.Parse(os.Args[1:])
@@ -177,7 +179,7 @@ func flagTranslate(fs *pflag.FlagSet, delimiter string) func(*pflag.Flag) (strin
 			return skey, val
 
 		// Worker node flags:
-		case flagRuntimePath, flagRuntimeCLI, flagCPULimit, flagMemoryLimit, flagEnhancedRunner:
+		case flagRuntimePath, flagRuntimeCLI, flagCPULimit, flagMemoryLimit, flagEnhancedRunner, flagEnableJobLimits:
 			skey := "worker" + delimiter + key
 			return skey, val
 
@@ -216,4 +218,5 @@ type Worker struct {
 	CPUPercentageLimit float64 `koanf:"cpu-percentage-limit"`
 	MemoryLimitKB      int64   `koanf:"memory-limit"`
 	EnhancedRunner     bool    `koanf:"enhanced-runner"`
+	EnableJobLimits    bool    `koanf:"enable-job-limits"`
 }

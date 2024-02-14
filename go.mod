@@ -3,7 +3,7 @@ module github.com/blocklessnetwork/b7s
 go 1.21.0
 
 require (
-	github.com/Maelkum/overseer v0.1.1-0.20240209165417-7bc8c8abb741
+	github.com/Maelkum/overseer v0.1.2
 	github.com/Microsoft/go-winio v0.6.1
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/blocklessnetwork/b7s-attributes v0.0.0-20231003175355-c87ad3eae97e
@@ -177,3 +177,6 @@ require (
 )
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+
+
+replace	github.com/Maelkum/overseer => ../overseer
