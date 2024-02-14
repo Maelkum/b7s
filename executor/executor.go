@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"sync"
 
 	"github.com/rs/zerolog"
 )
@@ -16,7 +17,12 @@ type Executor struct {
 	log zerolog.Logger
 	cfg Config
 
-	useEnhancedRunner bool
+	jobs jobMap
+}
+
+type jobMap struct {
+	*sync.Mutex
+	jobs map[string]string
 }
 
 // New creates a new Executor with the specified working directory.
@@ -60,8 +66,16 @@ func New(log zerolog.Logger, options ...Option) (*Executor, error) {
 		cfg: cfg,
 	}
 
-	// If we have an overseer, use an enhanced runner for executions.
-	e.useEnhancedRunner = e.cfg.Overseer != nil
+	if e.cfg.useEnhancerRunner {
+		e.jobs = jobMap{
+			jobs:  make(map[string]string),
+			Mutex: &sync.Mutex{},
+		}
+	}
 
 	return &e, nil
+}
+
+func (e *Executor) SupportsLongRunningJobs() bool {
+	return e.cfg.useEnhancerRunner
 }

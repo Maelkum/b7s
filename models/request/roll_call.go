@@ -16,4 +16,5 @@ type RollCall struct {
 	RequestID  string              `json:"request_id,omitempty"`
 	Consensus  consensus.Type      `json:"consensus"`
 	Attributes *execute.Attributes `json:"attributes,omitempty"`
+	Detach     bool                `json:"detach,omitempty"`
 }

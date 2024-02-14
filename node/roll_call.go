@@ -34,6 +34,11 @@ func (n *Node) processRollCall(ctx context.Context, from peer.ID, payload []byte
 	log := n.log.With().Str("request", req.RequestID).Str("origin", req.Origin.String()).Str("function", req.FunctionID).Logger()
 	log.Debug().Msg("received roll call request")
 
+	if req.Detach && !n.executor.SupportsLongRunningJobs() {
+		log.Info().Msg("we don't support long running jobs, skipping")
+		return nil
+	}
+
 	// TODO: (raft) temporary measure - at the moment we don't support multiple raft clusters on the same node at the same time.
 	if req.Consensus == consensus.Raft && n.haveRaftClusters() {
 		log.Warn().Msg("cannot respond to a roll call as we're already participating in one raft cluster")
@@ -110,6 +115,7 @@ func (n *Node) executeRollCall(
 	consensus consensus.Type,
 	topic string,
 	attributes *execute.Attributes,
+	detach bool,
 ) ([]peer.ID, error) {
 
 	// Create a logger with relevant context.
@@ -120,7 +126,7 @@ func (n *Node) executeRollCall(
 	n.rollCall.create(requestID)
 	defer n.rollCall.remove(requestID)
 
-	err := n.publishRollCall(ctx, requestID, functionID, consensus, topic, attributes)
+	err := n.publishRollCall(ctx, requestID, functionID, consensus, topic, attributes, detach)
 	if err != nil {
 		return nil, fmt.Errorf("could not publish roll call: %w", err)
 	}
@@ -173,7 +179,7 @@ rollCallResponseLoop:
 
 // publishRollCall will create a roll call request for executing the given function.
 // On successful issuance of the roll call request, we return the ID of the issued request.
-func (n *Node) publishRollCall(ctx context.Context, requestID string, functionID string, consensus consensus.Type, topic string, attributes *execute.Attributes) error {
+func (n *Node) publishRollCall(ctx context.Context, requestID string, functionID string, consensus consensus.Type, topic string, attributes *execute.Attributes, detach bool) error {
 
 	// Create a roll call request.
 	rollCall := request.RollCall{
@@ -183,6 +189,7 @@ func (n *Node) publishRollCall(ctx context.Context, requestID string, functionID
 		RequestID:  requestID,
 		Consensus:  consensus,
 		Attributes: attributes,
+		Detach:     detach,
 	}
 
 	if topic == "" {

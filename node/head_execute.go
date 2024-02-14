@@ -87,10 +87,16 @@ func (n *Node) headExecute(ctx context.Context, requestID string, req execute.Re
 		log = log.With().Str("consensus", consensusAlgo.String()).Logger()
 	}
 
+	// For now let's limit detached execution to direct ones.
+	if consensusRequired(consensusAlgo) && req.Config.Detach {
+		return codes.Error, nil, execute.Cluster{}, errors.New("detached execution not compatible with consensus")
+	}
+
 	log.Info().Msg("processing execution request")
 
 	// Phase 1. - Issue roll call to nodes.
-	reportingPeers, err := n.executeRollCall(ctx, requestID, req.FunctionID, nodeCount, consensusAlgo, subgroup, req.Config.Attributes)
+	// TODO: Switch back to passing execute request now, this has too many params.
+	reportingPeers, err := n.executeRollCall(ctx, requestID, req.FunctionID, nodeCount, consensusAlgo, subgroup, req.Config.Attributes, req.Config.Detach)
 	if err != nil {
 		code := codes.Error
 		if errors.Is(err, blockless.ErrRollCallTimeout) {

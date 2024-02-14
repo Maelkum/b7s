@@ -29,4 +29,7 @@ const (
 	MessageFormCluster             = "MsgFormCluster"
 	MessageFormClusterResponse     = "MsgFormClusterResponse"
 	MessageDisbandCluster          = "MsgDisbandCluster"
+	MessageExecControl             = "MsgExecControl"
 )
+
+// TODO: Remove the unused ones

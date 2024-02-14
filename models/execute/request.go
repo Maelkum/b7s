@@ -19,7 +19,7 @@ type Parameter struct {
 
 // Config represents the configurable options for an execution request.
 type Config struct {
-	Runtime           BLSRuntimeConfig     `json:"runtime,omitempty"`
+	Runtime           BLSRuntimeConfig  `json:"runtime,omitempty"`
 	Environment       []EnvVar          `json:"env_vars,omitempty"`
 	Stdin             *string           `json:"stdin,omitempty"`
 	Permissions       []string          `json:"permissions,omitempty"`
@@ -27,13 +27,10 @@ type Config struct {
 
 	Attributes *Attributes `json:"attributes,omitempty"`
 
-	// NodeCount specifies how many nodes should execute this request.
-	NodeCount int `json:"number_of_nodes,omitempty"`
-	// Consensus algorithm to use. Raft and PBFT are supported at this moment.
-	ConsensusAlgorithm string `json:"consensus_algorithm,omitempty"`
-
-	// Threshold (percentage) defines how many nodes should respond with a result to consider this execution successful.
-	Threshold float64 `json:"threshold,omitempty"`
+	NodeCount          int     `json:"number_of_nodes,omitempty"`     // NodeCount specifies how many nodes should execute this request.
+	ConsensusAlgorithm string  `json:"consensus_algorithm,omitempty"` // Consensus algorithm to use. Raft and PBFT are supported at this moment.
+	Threshold          float64 `json:"threshold,omitempty"`           // Threshold (percentage) defines how many nodes should respond with a result to consider this execution successful.
+	Detach             bool    `json:"detach,omitempty"`
 }
 
 // EnvVar represents the name and value of the environment variables set for the execution.

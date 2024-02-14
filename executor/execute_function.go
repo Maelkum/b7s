@@ -65,7 +65,7 @@ func (e *Executor) executeFunction(requestID string, req execute.Request) (execu
 	runtime := filepath.Join(e.cfg.RuntimeDir, e.cfg.ExecutableName)
 
 	var runner Runner
-	if e.useEnhancedRunner {
+	if e.cfg.useEnhancerRunner {
 		runner = e.newEnhancedRunner()
 	} else {
 		runner = e.newSimpleRunner()

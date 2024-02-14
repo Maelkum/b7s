@@ -6,4 +6,6 @@ import (
 
 type Overseer interface {
 	Run(job.Job) (job.State, error)
+	Start(job.Job) (string, error)
+	Wait(id string) (job.State, error)
 }
