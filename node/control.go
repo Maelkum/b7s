@@ -39,7 +39,7 @@ func (n *Node) processExecControl(ctx context.Context, from peer.ID, payload []b
 		}
 
 		msg := response.ExecControl{
-			Type:      blockless.MessageExecControl,
+			Type:      blockless.MessageExecControlResponse,
 			RequestID: req.RequestID,
 			Action:    req.Action.String(),
 			Results: execute.ResultMap{
@@ -83,5 +83,17 @@ func (n *Node) headExecControl(requestID string, action request.ExecAction) erro
 }
 
 func (n *Node) processExecControlResponse(ctx context.Context, from peer.ID, payload []byte) error {
-	return errors.New("TBD: not implemented")
+
+	// Unpack the message.
+	var res response.ExecControl
+	err := json.Unmarshal(payload, &res)
+	if err != nil {
+		return fmt.Errorf("could not unpack execute control response: %w", err)
+	}
+	res.From = from
+
+	log := n.log.With().Interface("response", res).Str("request", res.RequestID).Str("action", res.Action).Logger()
+	log.Info().Msg("received execution control response message")
+
+	return nil
 }

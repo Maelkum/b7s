@@ -143,6 +143,8 @@ func (n *Node) getHandler(msgType string) HandlerFunc {
 		return n.processExecute
 	case blockless.MessageExecControl:
 		return n.processExecControl
+	case blockless.MessageExecControlResponse:
+		return n.processExecControlResponse
 
 	default:
 		return func(_ context.Context, from peer.ID, _ []byte) error {
