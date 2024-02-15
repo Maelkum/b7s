@@ -18,3 +18,16 @@ const (
 	ExecWait
 	ExecKill
 )
+
+func (a ExecAction) String() string {
+	switch a {
+	case ExecStat:
+		return "stat"
+	case ExecWait:
+		return "wait"
+	case ExecKill:
+		return "kill"
+	default:
+		return "unknown"
+	}
+}

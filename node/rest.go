@@ -65,6 +65,20 @@ func (n *Node) PublishFunctionInstall(ctx context.Context, uri string, cid strin
 	return nil
 }
 
+func (n *Node) ExecutionControl(requestID string, action request.ExecAction) error {
+
+	if !n.isHead() {
+		return nil
+	}
+
+	err := n.headExecControl(requestID, action)
+	if err != nil {
+		return fmt.Errorf("could not perform execution control: %w", err)
+	}
+
+	return nil
+}
+
 // createInstallMessageFromURI creates a MsgInstallFunction from the given URI.
 // CID is calculated as a SHA-256 hash of the URI.
 func createInstallMessageFromURI(uri string) (request.InstallFunction, error) {

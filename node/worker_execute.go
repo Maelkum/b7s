@@ -3,6 +3,7 @@ package node
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -30,7 +31,9 @@ func (n *Node) workerProcessExecute(ctx context.Context, from peer.ID, payload [
 		return fmt.Errorf("request ID must be set by the head node")
 	}
 
-	log := n.log.With().Str("request", req.RequestID).Str("function", req.FunctionID).Logger()
+	log := n.log.With().Str("request", req.RequestID).Str("function", req.FunctionID).Bool("detached", req.Config.Detach).Logger()
+
+	// TODO: This can now be just a "start" too, so the result is a quirky formulation.
 
 	// NOTE: In case of an error, we do not return early from this function.
 	// Instead, we send the response back to the caller, whatever it may be.
@@ -47,8 +50,10 @@ func (n *Node) workerProcessExecute(ctx context.Context, from peer.ID, payload [
 
 	log.Info().Str("code", code.String()).Msg("execution complete")
 
-	// Cache the execution result.
-	n.executeResponses.Set(requestID, result)
+	// Cache the execution result (only if not detached).
+	if code != codes.Created {
+		n.executeResponses.Set(requestID, result)
+	}
 
 	// Create the execution response from the execution result.
 	res := response.Execute{
@@ -94,12 +99,36 @@ func (n *Node) workerExecute(ctx context.Context, requestID string, timestamp ti
 
 	// We are not part of a cluster - just execute the request.
 	if !consensusRequired(consensus) {
+
+		// If we have a detached execution, just start it and return
+		if req.Config.Detach {
+
+			// Since this is only a start of a job - we don't have a result yet.
+			pseudoResult := execute.Result{
+				Code:      codes.Created,
+				RequestID: requestID,
+			}
+
+			err := n.executor.ExecutionStart(requestID, req)
+			if err != nil {
+				pseudoResult.Code = codes.Error
+				return codes.Error, pseudoResult, fmt.Errorf("execution failed: %w", err)
+			}
+
+			return codes.Created, pseudoResult, nil
+		}
+
 		res, err := n.executor.ExecuteFunction(requestID, req)
 		if err != nil {
 			return res.Code, res, fmt.Errorf("execution failed: %w", err)
 		}
 
 		return res.Code, res, nil
+	}
+
+	// We don't support detached execution and consensus.
+	if req.Config.Detach {
+		return codes.Error, execute.Result{}, errors.New("detached execution not compatible with consensus")
 	}
 
 	// Now we KNOW we need a consensus. A cluster must already exist.

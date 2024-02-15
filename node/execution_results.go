@@ -130,8 +130,12 @@ func (n *Node) gatherExecutionResults(ctx context.Context, requestID string, pee
 
 			er := res.(response.Execute)
 
+			n.log.Info().Str("peer", rp.String()).Str("code", er.Code.String()).Msg("accounted execution response from peer")
+
 			exres, ok := er.Results[rp]
 			if !ok {
+				// TODO: This might have been a detached worker that's too late.
+				// In that case we should be nice and tell him to cancel his execution.
 				return
 			}
 

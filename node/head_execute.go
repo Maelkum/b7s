@@ -33,7 +33,7 @@ func (n *Node) headProcessExecute(ctx context.Context, from peer.ID, payload []b
 		return fmt.Errorf("could not generate new request ID: %w", err)
 	}
 
-	log := n.log.With().Str("request", req.RequestID).Str("peer", from.String()).Str("function", req.FunctionID).Logger()
+	log := n.log.With().Str("request", req.RequestID).Str("peer", from.String()).Str("function", req.FunctionID).Bool("detached", req.Config.Detach).Logger()
 
 	code, results, cluster, err := n.headExecute(ctx, requestID, req.Request, "")
 	if err != nil {
@@ -75,7 +75,7 @@ func (n *Node) headExecute(ctx context.Context, requestID string, req execute.Re
 	}
 
 	// Create a logger with relevant context.
-	log := n.log.With().Str("request", requestID).Str("function", req.FunctionID).Int("node_count", nodeCount).Logger()
+	log := n.log.With().Str("request", requestID).Str("function", req.FunctionID).Int("node_count", nodeCount).Bool("detached", req.Config.Detach).Logger()
 
 	consensusAlgo, err := parseConsensusAlgorithm(req.Config.ConsensusAlgorithm)
 	if err != nil {
@@ -173,6 +173,10 @@ func (n *Node) headExecute(ctx context.Context, requestID string, req execute.Re
 
 	log.Info().Int("cluster_size", len(reportingPeers)).Int("responded", len(results)).Msg("received execution responses")
 
+	if req.Config.Detach {
+		n.recordDetachedExecutions(requestID, results)
+	}
+
 	// How many results do we have, and how many do we expect.
 	respondRatio := float64(len(results)) / float64(len(reportingPeers))
 	threshold := determineThreshold(req)
@@ -195,4 +199,23 @@ func determineThreshold(req execute.Request) float64 {
 	}
 
 	return defaultExecutionThreshold
+}
+
+func (n *Node) recordDetachedExecutions(requestID string, results execute.ResultMap) {
+
+	active := make([]peer.ID, 0, len(results))
+	for peer, res := range results {
+		if res.Code != codes.Created {
+			continue
+		}
+
+		active = append(active, peer)
+	}
+
+	n.log.Info().Interface("results", results).Str("request", requestID).Msg("worker responses")
+
+	n.detachedExecutionsLock.Lock()
+	defer n.detachedExecutionsLock.Unlock()
+
+	n.detachedExecutions[requestID] = active
 }

@@ -6,6 +6,7 @@ type Code string
 // Response codes.
 const (
 	OK             Code = "200"
+	Created        Code = "201"
 	Accepted       Code = "202"
 	NoContent      Code = "204"
 	PartialContent Code = "206"

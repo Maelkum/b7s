@@ -38,11 +38,11 @@ type Node struct {
 
 	rollCall *rollCallQueue
 
-	// clusters maps request ID to the cluster the node belongs to.
-	clusters map[string]consensusExecutor
+	clusters    map[string]consensusExecutor // clusters maps request ID to the cluster the node belongs to.
+	clusterLock sync.RWMutex                 // clusterLock is used to synchronize access to the `clusters` map.
 
-	// clusterLock is used to synchronize access to the `clusters` map.
-	clusterLock sync.RWMutex
+	detachedExecutions     map[string][]peer.ID // map request ID to the peers executing it
+	detachedExecutionsLock sync.RWMutex         // synchronize access to the `detachedExecutions` map.
 
 	executeResponses   *waitmap.WaitMap
 	consensusResponses *waitmap.WaitMap
@@ -80,8 +80,12 @@ func New(log zerolog.Logger, host *host.Host, peerStore PeerStore, fstore FStore
 		sema:      make(chan struct{}, cfg.Concurrency),
 		subgroups: subgroups,
 
-		rollCall:           newQueue(rollCallQueueBufferSize),
-		clusters:           make(map[string]consensusExecutor),
+		rollCall: newQueue(rollCallQueueBufferSize),
+		clusters: make(map[string]consensusExecutor),
+
+		detachedExecutions:     make(map[string][]peer.ID),
+		detachedExecutionsLock: sync.RWMutex{},
+
 		executeResponses:   waitmap.New(),
 		consensusResponses: waitmap.New(),
 	}
@@ -135,9 +139,10 @@ func (n *Node) getHandler(msgType string) HandlerFunc {
 		return n.processFormClusterResponse
 	case blockless.MessageDisbandCluster:
 		return n.processDisbandCluster
-
 	case blockless.MessageExecute:
 		return n.processExecute
+	case blockless.MessageExecControl:
+		return n.processExecControl
 
 	default:
 		return func(_ context.Context, from peer.ID, _ []byte) error {
