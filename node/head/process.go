@@ -7,12 +7,11 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 
 	"github.com/blocklessnetwork/b7s/models/blockless"
-	"github.com/blocklessnetwork/b7s/node/internal/pipeline"
-	"github.com/blocklessnetwork/b7s/node/node"
+	"github.com/blocklessnetwork/b7s/node/internal/node"
 )
 
 // processMessage will determine which message was received and how to process it.
-func (h *HeadNode) processMessage(ctx context.Context, from peer.ID, payload []byte, pipeline pipeline.Pipeline) (procError error) {
+func (h *HeadNode) processMessage(ctx context.Context, from peer.ID, payload []byte, pipeline node.Pipeline) (procError error) {
 
 	// Determine message type.
 	msgType, err := node.GetMessageType(payload)
@@ -52,7 +51,7 @@ func (h *HeadNode) processMessage(ctx context.Context, from peer.ID, payload []b
 	// 	span.SetStatus(otelcodes.Error, spanStatusErr)
 	// }()
 
-	log := h.Log.With().Str("peer", from.String()).Str("type", msgType).Stringer("pipeline", pipeline).Logger()
+	log := h.Log().With().Stringer("peer", from).Str("type", msgType).Stringer("pipeline", pipeline).Logger()
 
 	if !node.CorrectPipeline(msgType, pipeline) {
 		log.Warn().Msg("message not allowed on pipeline")

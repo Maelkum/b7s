@@ -20,17 +20,17 @@ import (
 
 func (w *Worker) processExecute(ctx context.Context, from peer.ID, req request.Execute) error {
 
-	w.Metrics.IncrCounterWithLabels(functionExecutionsMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
+	w.Metrics().IncrCounterWithLabels(functionExecutionsMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
 
 	requestID := req.RequestID
 	if requestID == "" {
 		return fmt.Errorf("request ID must be set by the head node")
 	}
 
-	ctx, span := w.Tracer.Start(ctx, spanWorkerExecute, trace.WithAttributes(tracing.ExecutionAttributes(requestID, req.Request)...))
+	ctx, span := w.Tracer().Start(ctx, spanWorkerExecute, trace.WithAttributes(tracing.ExecutionAttributes(requestID, req.Request)...))
 	defer span.End()
 
-	log := w.Log.With().Str("request", requestID).Str("function", req.FunctionID).Logger()
+	log := w.Log().With().Str("request", requestID).Str("function", req.FunctionID).Logger()
 
 	// NOTE: In case of an error, we do not return early from this function.
 	// Instead, we send the response back to the caller, whatever it may be.
@@ -49,11 +49,13 @@ func (w *Worker) processExecute(ctx context.Context, from peer.ID, req request.E
 	if err != nil {
 		log.Error().Err(err).Msg("could not get metadata for the execution result")
 	}
+	// TODO: Metadata stuff
+	_ = metadata
 
 	log.Info().Stringer("code", code).Msg("execution complete")
 
 	// Create the execution response from the execution result.
-	rm := execute.ResultMap{w.Host.ID(): {Result: result, Metadata: metadata}}
+	rm := execute.ResultMap{w.Host().ID(): {Result: result, Metadata: metadata}}
 
 	w.executeResponses.Set(requestID, rm)
 
@@ -112,7 +114,7 @@ func (w *Worker) workerExecute(ctx context.Context, requestID string, timestamp 
 		return codes.Error, execute.Result{}, fmt.Errorf("consensus required but no cluster found; omitted cluster formation message or error forming cluster (request: %s)", requestID)
 	}
 
-	log := w.Log.With().Str("request", requestID).Str("function", req.FunctionID).Stringer("consensus", cs).Logger()
+	log := w.Log().With().Str("request", requestID).Str("function", req.FunctionID).Stringer("consensus", cs).Logger()
 
 	log.Info().Msg("execution request to be executed as part of a cluster")
 
@@ -126,6 +128,7 @@ func (w *Worker) workerExecute(ctx context.Context, requestID string, timestamp 
 	return code, value, nil
 }
 
+// TODO: Worker order model => remove this shit.
 func singleNodeResultMap(id peer.ID, res execute.NodeResult) execute.ResultMap {
 	return map[peer.ID]execute.NodeResult{
 		id: res,

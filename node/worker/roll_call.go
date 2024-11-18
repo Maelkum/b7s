@@ -13,9 +13,9 @@ import (
 
 func (w *Worker) processRollCall(ctx context.Context, from peer.ID, req request.RollCall) error {
 
-	w.Metrics.IncrCounterWithLabels(rollCallsSeenMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
+	w.Metrics().IncrCounterWithLabels(rollCallsSeenMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
 
-	log := w.Log.With().
+	log := w.Log().With().
 		Stringer("origin", req.Origin).
 		Str("request", req.RequestID).
 		Str("function", req.FunctionID).Logger()
@@ -73,7 +73,7 @@ func (w *Worker) processRollCall(ctx context.Context, from peer.ID, req request.
 
 	log.Info().Msg("reporting for roll call")
 
-	w.Metrics.IncrCounterWithLabels(rollCallsAppliedMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
+	w.Metrics().IncrCounterWithLabels(rollCallsAppliedMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
 
 	// Send positive response.
 	err = w.Send(ctx, req.Origin, req.Response(codes.Accepted))

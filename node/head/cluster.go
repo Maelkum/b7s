@@ -28,7 +28,7 @@ func (h *HeadNode) formCluster(ctx context.Context, requestID string, replicas [
 	for _, replica := range replicas {
 		addrInfo := peer.AddrInfo{
 			ID:    replica,
-			Addrs: h.Host.Peerstore().Addrs(replica),
+			Addrs: h.Host().Peerstore().Addrs(replica),
 		}
 
 		reqCluster.ConnectionInfo = append(reqCluster.ConnectionInfo, addrInfo)
@@ -41,7 +41,7 @@ func (h *HeadNode) formCluster(ctx context.Context, requestID string, replicas [
 	}
 
 	// Wait for cluster confirmation messages.
-	h.Log.Debug().Str("request", requestID).Msg("waiting for cluster to be formed")
+	h.Log().Debug().Str("request", requestID).Msg("waiting for cluster to be formed")
 
 	// We're willing to wait for a limited amount of time.
 	clusterCtx, exCancel := context.WithTimeout(ctx, h.cfg.ExecutionTimeout)
@@ -65,13 +65,13 @@ func (h *HeadNode) formCluster(ctx context.Context, requestID string, replicas [
 				return
 			}
 
-			h.Log.Info().
+			h.Log().Info().
 				Stringer("peer", rp).
 				Str("request", requestID).
 				Msg("accounted consensus cluster response from roll called peer")
 
 			if fc.Code != codes.OK {
-				h.Log.Warn().
+				h.Log().Warn().
 					Stringer("peer", rp).
 					Msg("peer failed to join consensus cluster")
 				return
@@ -108,7 +108,7 @@ func (h *HeadNode) disbandCluster(requestID string, replicas []peer.ID) error {
 		return fmt.Errorf("could not send cluster disband request (request: %s): %w", requestID, err)
 	}
 
-	h.Log.Info().
+	h.Log().Info().
 		Err(err).
 		Str("request", requestID).
 		Strs("peers", blockless.PeerIDsToStr(replicas)).
@@ -120,7 +120,7 @@ func (h *HeadNode) disbandCluster(requestID string, replicas []peer.ID) error {
 // processFormClusterResponse will record the cluster formation response.
 func (h *HeadNode) processFormClusterResponse(ctx context.Context, from peer.ID, res response.FormCluster) error {
 
-	h.Log.Debug().
+	h.Log().Debug().
 		Stringer("from", from).
 		Str("request", res.RequestID).
 		Msg("received cluster formation response")

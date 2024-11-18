@@ -33,7 +33,7 @@ func (h *HeadNode) processExecute(ctx context.Context, from peer.ID, req request
 
 	requestID := newRequestID()
 
-	log := h.Log.With().
+	log := h.Log().With().
 		Stringer("peer", from).
 		Str("request", req.RequestID).
 		Str("function", req.FunctionID).Logger()
@@ -64,13 +64,13 @@ func (h *HeadNode) processExecute(ctx context.Context, from peer.ID, req request
 // The returned map contains execution results, mapped to the peer IDs of peers who reported them.
 func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execute.Request, subgroup string) (codes.Code, execute.ResultMap, execute.Cluster, error) {
 
-	h.Metrics.IncrCounterWithLabels(functionExecutionsMetric, 1,
+	h.Metrics().IncrCounterWithLabels(functionExecutionsMetric, 1,
 		[]metrics.Label{
 			{Name: "function", Value: req.FunctionID},
 			{Name: "consensus", Value: req.Config.ConsensusAlgorithm},
 		})
 
-	ctx, span := h.Tracer.Start(ctx, spanHeadExecute,
+	ctx, span := h.Tracer().Start(ctx, spanHeadExecute,
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(tracing.ExecutionAttributes(requestID, req)...))
 	defer span.End()
@@ -81,7 +81,7 @@ func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execut
 	}
 
 	// Create a logger with relevant context.
-	log := h.Log.With().Str("request", requestID).Str("function", req.FunctionID).Int("node_count", nodeCount).Logger()
+	log := h.Log().With().Str("request", requestID).Str("function", req.FunctionID).Int("node_count", nodeCount).Logger()
 
 	consensusAlgo, err := consensus.Parse(req.Config.ConsensusAlgorithm)
 	if err != nil {
@@ -139,7 +139,7 @@ func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execut
 
 	// If we're working with PBFT, sign the request.
 	if consensusAlgo == consensus.PBFT {
-		err := reqExecute.Request.Sign(h.Host.PrivateKey())
+		err := reqExecute.Request.Sign(h.Host().PrivateKey())
 		if err != nil {
 			return codes.Error, nil, cluster, fmt.Errorf("could not sign execution request (function: %s, request: %s): %w", req.FunctionID, requestID, err)
 		}
@@ -193,7 +193,7 @@ func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execut
 
 func (h *HeadNode) processExecuteResponse(ctx context.Context, from peer.ID, res response.Execute) error {
 
-	h.Log.Debug().
+	h.Log().Debug().
 		Stringer("from", from).
 		Str("request", res.RequestID).
 		Msg("received execution response")

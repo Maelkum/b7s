@@ -9,7 +9,7 @@ import (
 
 func (h *HeadNode) processInstallFunctionResponse(ctx context.Context, from peer.ID, res response.InstallFunction) error {
 
-	h.Log.Trace().
+	h.Log().Trace().
 		Stringer("from", from).
 		Str("cid", res.CID).
 		Msg("function install response received")

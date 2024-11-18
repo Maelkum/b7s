@@ -7,8 +7,8 @@ import (
 
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/models/response"
+	"github.com/blocklessnetwork/b7s/node/internal/node"
 	"github.com/blocklessnetwork/b7s/node/internal/waitmap"
-	"github.com/blocklessnetwork/b7s/node/node"
 )
 
 type HeadNode struct {

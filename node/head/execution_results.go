@@ -49,7 +49,7 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 				return
 			}
 
-			h.Log.Info().Stringer("peer", sender).Str("request", requestID).Msg("accounted execution response from peer")
+			h.Log().Info().Stringer("peer", sender).Str("request", requestID).Msg("accounted execution response from peer")
 
 			er, ok := res[sender]
 			if !ok {
@@ -58,13 +58,13 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 
 			pub, err := sender.ExtractPublicKey()
 			if err != nil {
-				h.Log.Error().Err(err).Msg("could not derive public key from peer ID")
+				h.Log().Error().Err(err).Msg("could not derive public key from peer ID")
 				return
 			}
 
 			err = er.VerifySignature(pub)
 			if err != nil {
-				h.Log.Error().Err(err).Msg("could not verify signature of an execution response")
+				h.Log().Error().Err(err).Msg("could not verify signature of an execution response")
 				return
 			}
 
@@ -93,7 +93,7 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 			results[reskey] = result
 
 			if uint(len(result.peers)) >= count {
-				h.Log.Info().Str("request", requestID).Int("peers", len(peers)).Uint("matching_results", count).Msg("have enough matching results")
+				h.Log().Info().Str("request", requestID).Int("peers", len(peers)).Uint("matching_results", count).Msg("have enough matching results")
 				exCancel()
 
 				for _, peer := range result.peers {
@@ -138,7 +138,7 @@ func (h *HeadNode) gatherExecutionResults(ctx context.Context, requestID string,
 				return
 			}
 
-			h.Log.Info().Str("peer", rp.String()).Msg("accounted execution response from peer")
+			h.Log().Info().Str("peer", rp.String()).Msg("accounted execution response from peer")
 
 			exres, ok := res[rp]
 			if !ok {

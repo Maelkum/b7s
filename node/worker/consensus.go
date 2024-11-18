@@ -35,7 +35,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 
 		metadata, err := w.cfg.MetadataProvider.Metadata(req.Execute, res.Result.Result)
 		if err != nil {
-			w.Log.Warn().Err(err).Msg("could not get metadata")
+			w.Log().Warn().Err(err).Msg("could not get metadata")
 		}
 
 		res.Metadata = metadata
@@ -43,23 +43,23 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 		msg := response.Execute{
 			Code:      res.Code,
 			RequestID: req.RequestID,
-			Results:   singleNodeResultMap(w.Host.ID(), res),
+			Results:   singleNodeResultMap(w.Host().ID(), res),
 		}
 
 		err = w.Send(ctx, req.Origin, &msg)
 		if err != nil {
-			w.Log.Error().Err(err).Str("peer", req.Origin.String()).Msg("could not send execution result to node")
+			w.Log().Error().Err(err).Stringer("peer", req.Origin).Msg("could not send execution result to node")
 		}
 	}
 
 	// Add a callback function to cache the execution result
 	cacheFn := func(req raft.FSMLogEntry, res execute.NodeResult) {
-		w.executeResponses.Set(req.RequestID, singleNodeResultMap(w.Host.ID(), res))
+		w.executeResponses.Set(req.RequestID, singleNodeResultMap(w.Host().ID(), res))
 	}
 
 	rh, err := raft.New(
-		w.Log,
-		w.Host,
+		*w.Log(),
+		w.Host(),
 		w.cfg.Workspace,
 		fc.RequestID,
 		w.executor,
@@ -85,7 +85,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request.FormCluster) error {
 
 	cacheFn := func(requestID string, origin peer.ID, request execute.Request, result execute.NodeResult) {
-		w.executeResponses.Set(requestID, singleNodeResultMap(w.Host.ID(), result))
+		w.executeResponses.Set(requestID, singleNodeResultMap(w.Host().ID(), result))
 	}
 
 	// If we have tracing enabled we will have trace info in the context.
@@ -96,8 +96,8 @@ func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request
 	}
 
 	ph, err := pbft.NewReplica(
-		w.Log,
-		w.Host,
+		*w.Log(),
+		w.Host(),
 		w.executor,
 		fc.Peers,
 		fc.RequestID,
@@ -132,7 +132,8 @@ func (w *Worker) leaveCluster(requestID string, timeout time.Duration) error {
 		return errors.New("no cluster with that ID")
 	}
 
-	w.Log.Info().Str("consensus", cluster.Consensus().String()).Str("request", requestID).Msg("leaving consensus cluster")
+	// TODO: Fix this logging.
+	w.Log().Info().Str("consensus", cluster.Consensus().String()).Str("request", requestID).Msg("leaving consensus cluster")
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -140,7 +141,7 @@ func (w *Worker) leaveCluster(requestID string, timeout time.Duration) error {
 	// We know that the request is done executing when we have a result for it.
 	_, ok = w.executeResponses.WaitFor(ctx, requestID)
 
-	log := w.Log.With().Str("request", requestID).Logger()
+	log := w.Log().With().Str("request", requestID).Logger()
 	log.Info().Bool("executed_work", ok).Msg("waiting for execution done, leaving cluster")
 
 	err := cluster.Shutdown()

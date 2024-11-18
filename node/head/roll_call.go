@@ -29,7 +29,7 @@ func (h *HeadNode) executeRollCall(
 ) ([]peer.ID, error) {
 
 	// Create a logger with relevant context.
-	log := h.Log.With().
+	log := h.Log().With().
 		Str("request", requestID).
 		Str("function", functionID).
 		Int("node_count", nodeCount).
@@ -86,7 +86,7 @@ rollCallResponseLoop:
 			// Check if we are connected to this peer.
 			// Since we receive responses to roll call via direct messages - should not happen.
 			if !h.Connected(reply.From) {
-				h.Log.Info().Str("peer", reply.From.String()).Msg("skipping roll call response from unconnected peer")
+				h.Log().Info().Str("peer", reply.From.String()).Msg("skipping roll call response from unconnected peer")
 				continue
 			}
 
@@ -113,11 +113,11 @@ rollCallResponseLoop:
 // On successful issuance of the roll call request, we return the ID of the issued request.
 func (h *HeadNode) publishRollCall(ctx context.Context, requestID string, functionID string, consensus consensus.Type, topic string, attributes *execute.Attributes) error {
 
-	h.Metrics.IncrCounterWithLabels(rollCallsPublishedMetric, 1, []metrics.Label{{Name: "function", Value: functionID}})
+	h.Metrics().IncrCounterWithLabels(rollCallsPublishedMetric, 1, []metrics.Label{{Name: "function", Value: functionID}})
 
 	// Create a roll call request.
 	rollCall := request.RollCall{
-		Origin:     h.Host.ID(),
+		Origin:     h.Host().ID(),
 		FunctionID: functionID,
 		RequestID:  requestID,
 		Consensus:  consensus,
@@ -139,7 +139,7 @@ func (h *HeadNode) publishRollCall(ctx context.Context, requestID string, functi
 
 func (h *HeadNode) processRollCallResponse(ctx context.Context, from peer.ID, res response.RollCall) error {
 
-	log := h.Log.With().
+	log := h.Log().With().
 		Str("request", res.RequestID).
 		Stringer("peer", from).Logger()
 

@@ -13,12 +13,12 @@ import (
 
 func (w *Worker) processFormCluster(ctx context.Context, from peer.ID, req request.FormCluster) error {
 
-	w.Log.Info().Str("request", req.RequestID).Strs("peers", blockless.PeerIDsToStr(req.Peers)).Str("consensus", req.Consensus.String()).Msg("received request to form consensus cluster")
+	w.Log().Info().Str("request", req.RequestID).Strs("peers", blockless.PeerIDsToStr(req.Peers)).Str("consensus", req.Consensus.String()).Msg("received request to form consensus cluster")
 
 	// Add connection info about peers if we're not already connected to them.
 	for _, addrInfo := range req.ConnectionInfo {
 
-		if w.Host.ID() == addrInfo.ID {
+		if w.Host().ID() == addrInfo.ID {
 			continue
 		}
 
@@ -26,13 +26,13 @@ func (w *Worker) processFormCluster(ctx context.Context, from peer.ID, req reque
 			continue
 		}
 
-		w.Log.Debug().
-			Any("known", w.Host.Network().Peerstore().Addrs(addrInfo.ID)).
+		w.Log().Debug().
+			Any("known", w.Host().Network().Peerstore().Addrs(addrInfo.ID)).
 			Any("received", addrInfo.Addrs).
 			Stringer("peer", addrInfo.ID).
 			Msg("received addresses for fellow cluster replica")
 
-		w.Host.Network().Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, ClusterAddressTTL)
+		w.Host().Network().Peerstore().AddAddrs(addrInfo.ID, addrInfo.Addrs, ClusterAddressTTL)
 	}
 
 	switch req.Consensus {
@@ -49,7 +49,7 @@ func (w *Worker) processFormCluster(ctx context.Context, from peer.ID, req reque
 // processDisbandCluster will start cluster shutdown command.
 func (w *Worker) processDisbandCluster(ctx context.Context, from peer.ID, req request.DisbandCluster) error {
 
-	w.Log.Info().
+	w.Log().Info().
 		Stringer("peer", from).
 		Str("request", req.RequestID).
 		Msg("received request to disband consensus cluster")
@@ -59,7 +59,7 @@ func (w *Worker) processDisbandCluster(ctx context.Context, from peer.ID, req re
 		return fmt.Errorf("could not disband cluster (request: %s): %w", req.RequestID, err)
 	}
 
-	w.Log.Info().
+	w.Log().Info().
 		Stringer("peer", from).
 		Str("request", req.RequestID).
 		Msg("left consensus cluster")
