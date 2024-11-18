@@ -6,7 +6,7 @@ import (
 
 // Tracing span names.
 const (
-	spanWorkerExecute = "WorkerExecute"
+	spanWorkOrder = "WorkOrder"
 )
 
 // TODO: CHeck - duplicate span/metric definitions.

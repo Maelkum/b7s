@@ -38,12 +38,12 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 			w.Log().Warn().Err(err).Msg("could not get metadata")
 		}
 
-		res.Metadata = metadata
-
-		msg := response.Execute{
+		// TODO: Think: response.WorkOrder vs execute.Result vs execute.NodeResult => which one makes the most sense where
+		msg := response.WorkOrder{
 			Code:      res.Code,
-			RequestID: req.RequestID,
-			Results:   singleNodeResultMap(w.Host().ID(), res),
+			RequestID: fc.RequestID,
+			Result:    res.Result,
+			Metadata:  metadata,
 		}
 
 		err = w.Send(ctx, req.Origin, &msg)
@@ -54,7 +54,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 
 	// Add a callback function to cache the execution result
 	cacheFn := func(req raft.FSMLogEntry, res execute.NodeResult) {
-		w.executeResponses.Set(req.RequestID, singleNodeResultMap(w.Host().ID(), res))
+		w.executeResponses.Set(req.RequestID, res.Result)
 	}
 
 	rh, err := raft.New(
@@ -70,9 +70,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 		return fmt.Errorf("could not create raft node: %w", err)
 	}
 
-	w.clusterLock.Lock()
-	w.clusters[fc.RequestID] = rh
-	w.clusterLock.Unlock()
+	w.clusters.Set(fc.RequestID, rh)
 
 	err = w.Send(ctx, from, fc.Response(codes.OK).WithConsensus(fc.Consensus))
 	if err != nil {
@@ -84,8 +82,8 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 
 func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request.FormCluster) error {
 
-	cacheFn := func(requestID string, origin peer.ID, request execute.Request, result execute.NodeResult) {
-		w.executeResponses.Set(requestID, singleNodeResultMap(w.Host().ID(), result))
+	cacheFn := func(requestID string, origin peer.ID, req execute.Request, res execute.NodeResult) {
+		w.executeResponses.Set(fc.RequestID, res.Result)
 	}
 
 	// If we have tracing enabled we will have trace info in the context.
@@ -109,9 +107,7 @@ func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request
 		return fmt.Errorf("could not create PBFT node: %w", err)
 	}
 
-	w.clusterLock.Lock()
-	w.clusters[fc.RequestID] = ph
-	w.clusterLock.Unlock()
+	w.clusters.Set(fc.RequestID, ph)
 
 	err = w.Send(ctx, from, fc.Response(codes.OK).WithConsensus(fc.Consensus))
 	if err != nil {
@@ -124,16 +120,16 @@ func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request
 func (w *Worker) leaveCluster(requestID string, timeout time.Duration) error {
 
 	// Shutdown can take a while so use short locking intervals.
-	w.clusterLock.RLock()
-	cluster, ok := w.clusters[requestID]
-	w.clusterLock.RUnlock()
-
+	cluster, ok := w.clusters.Get(requestID)
 	if !ok {
 		return errors.New("no cluster with that ID")
 	}
 
 	// TODO: Fix this logging.
-	w.Log().Info().Str("consensus", cluster.Consensus().String()).Str("request", requestID).Msg("leaving consensus cluster")
+	w.Log().Info().
+		Str("request", requestID).
+		Stringer("consensus", cluster.Consensus()).
+		Msg("leaving consensus cluster")
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -150,9 +146,7 @@ func (w *Worker) leaveCluster(requestID string, timeout time.Duration) error {
 		return fmt.Errorf("could not leave cluster (request: %v): %w", requestID, err)
 	}
 
-	w.clusterLock.Lock()
-	delete(w.clusters, requestID)
-	w.clusterLock.Unlock()
+	w.clusters.Delete(requestID)
 
 	return nil
 }

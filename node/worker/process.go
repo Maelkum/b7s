@@ -69,8 +69,8 @@ func (w *Worker) processMessage(ctx context.Context, from peer.ID, payload []byt
 		return node.HandleMessage(ctx, from, payload, w.processInstallFunction)
 	case blockless.MessageRollCall:
 		return node.HandleMessage(ctx, from, payload, w.processRollCall)
-	case blockless.MessageExecute:
-		return node.HandleMessage(ctx, from, payload, w.processExecute)
+	case blockless.MessageWorkOrder:
+		return node.HandleMessage(ctx, from, payload, w.processWorkOrder)
 	case blockless.MessageFormCluster:
 		return node.HandleMessage(ctx, from, payload, w.processFormCluster)
 	case blockless.MessageDisbandCluster:

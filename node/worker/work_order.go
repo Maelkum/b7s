@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -16,50 +17,47 @@ import (
 	"github.com/blocklessnetwork/b7s/telemetry/tracing"
 )
 
-// TODO: Change this to a work order instead of execute request.
-
-func (w *Worker) processExecute(ctx context.Context, from peer.ID, req request.Execute) error {
+func (w *Worker) processWorkOrder(ctx context.Context, from peer.ID, req request.WorkOrder) error {
 
 	w.Metrics().IncrCounterWithLabels(functionExecutionsMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
 
 	requestID := req.RequestID
 	if requestID == "" {
-		return fmt.Errorf("request ID must be set by the head node")
+		return errors.New("request ID missing")
 	}
 
-	ctx, span := w.Tracer().Start(ctx, spanWorkerExecute, trace.WithAttributes(tracing.ExecutionAttributes(requestID, req.Request)...))
+	ctx, span := w.Tracer().Start(ctx, spanWorkOrder, trace.WithAttributes(tracing.ExecutionAttributes(requestID, req.Request)...))
 	defer span.End()
 
 	log := w.Log().With().Str("request", requestID).Str("function", req.FunctionID).Logger()
 
 	// NOTE: In case of an error, we do not return early from this function.
 	// Instead, we send the response back to the caller, whatever it may be.
-	code, result, err := w.workerExecute(ctx, requestID, req.Timestamp, req.Request, from)
+	code, result, err := w.execute(ctx, requestID, req.Timestamp, req.Request, from)
 	if err != nil {
 		log.Error().Err(err).Stringer("peer", from).Msg("execution failed")
 	}
 
-	// There's little benefit to sending a response just to say we didn't execute anything.
-	if code == codes.NoContent {
+	switch code {
+
+	case codes.NoContent:
+		// There's little benefit to sending a response just to say we didn't execute anything.
 		log.Info().Msg("no execution done - stopping")
 		return nil
+
+	case codes.OK:
+		w.executeResponses.Set(requestID, result)
 	}
 
 	metadata, err := w.cfg.MetadataProvider.Metadata(req.Request, result.Result)
 	if err != nil {
 		log.Error().Err(err).Msg("could not get metadata for the execution result")
 	}
-	// TODO: Metadata stuff
-	_ = metadata
+
+	// Prepare a work order response.
+	res := req.Response(code, result).WithMetadata(metadata)
 
 	log.Info().Stringer("code", code).Msg("execution complete")
-
-	// Create the execution response from the execution result.
-	rm := execute.ResultMap{w.Host().ID(): {Result: result, Metadata: metadata}}
-
-	w.executeResponses.Set(requestID, rm)
-
-	res := req.Response(code).WithResults(rm)
 
 	// Send the response, whatever it may be (success or failure).
 	err = w.Send(ctx, from, res)
@@ -70,8 +68,7 @@ func (w *Worker) processExecute(ctx context.Context, from peer.ID, req request.E
 	return nil
 }
 
-// workerExecute is called on the worker node to use its executor component to invoke the function.
-func (w *Worker) workerExecute(ctx context.Context, requestID string, timestamp time.Time, req execute.Request, from peer.ID) (codes.Code, execute.Result, error) {
+func (w *Worker) execute(ctx context.Context, requestID string, timestamp time.Time, req execute.Request, from peer.ID) (codes.Code, execute.Result, error) {
 
 	// Check if we have function in store.
 	functionInstalled, err := w.fstore.IsInstalled(req.FunctionID)
@@ -105,32 +102,25 @@ func (w *Worker) workerExecute(ctx context.Context, requestID string, timestamp 
 	}
 
 	// Now we KNOW we need a consensus. A cluster must already exist.
-
-	w.clusterLock.RLock()
-	cluster, ok := w.clusters[requestID]
-	w.clusterLock.RUnlock()
-
+	cluster, ok := w.clusters.Get(requestID)
 	if !ok {
 		return codes.Error, execute.Result{}, fmt.Errorf("consensus required but no cluster found; omitted cluster formation message or error forming cluster (request: %s)", requestID)
 	}
 
-	log := w.Log().With().Str("request", requestID).Str("function", req.FunctionID).Stringer("consensus", cs).Logger()
+	log := w.Log().With().
+		Str("request", requestID).
+		Str("function", req.FunctionID).
+		Stringer("consensus", cs).
+		Logger()
 
-	log.Info().Msg("execution request to be executed as part of a cluster")
+	log.Info().Msg("work order to be executed as part of a cluster")
 
 	code, value, err := cluster.Execute(from, requestID, timestamp, req)
 	if err != nil {
 		return codes.Error, execute.Result{}, fmt.Errorf("execution failed: %w", err)
 	}
 
-	log.Info().Str("code", string(code)).Msg("node processed the execution request")
+	log.Info().Stringer("code", code).Msg("node processed the work order")
 
 	return code, value, nil
-}
-
-// TODO: Worker order model => remove this shit.
-func singleNodeResultMap(id peer.ID, res execute.NodeResult) execute.ResultMap {
-	return map[peer.ID]execute.NodeResult{
-		id: res,
-	}
 }

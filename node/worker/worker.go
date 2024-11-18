@@ -9,6 +9,7 @@ import (
 	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/node/internal/node"
+	"github.com/blocklessnetwork/b7s/node/internal/syncmap"
 	"github.com/blocklessnetwork/b7s/node/internal/waitmap"
 )
 
@@ -27,13 +28,10 @@ type Worker struct {
 
 	// TODO: Update cluster map, don't use this.
 	// clusters maps request ID to the cluster the node belongs to.
-	clusters map[string]consensusExecutor
+	clusters *syncmap.Map[string, consensusExecutor]
 
 	// TODO: This no longer needs to be a waitmap for the worker.
-	executeResponses *waitmap.WaitMap[string, execute.ResultMap]
-
-	// clusterLock is used to synchronize access to the `clusters` map.
-	clusterLock sync.RWMutex
+	executeResponses *waitmap.WaitMap[string, execute.Result]
 }
 
 func New(node node.Core, fstore FStore, executor blockless.Executor, options ...Option) (*Worker, error) {
@@ -63,7 +61,7 @@ func New(node node.Core, fstore FStore, executor blockless.Executor, options ...
 		fstore:   fstore,
 		executor: executor,
 
-		clusters: make(map[string]consensusExecutor),
+		clusters: syncmap.New[string, consensusExecutor](),
 	}
 
 	return worker, nil
