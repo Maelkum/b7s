@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/libp2p/go-libp2p/core/peer"
+
 	"github.com/blocklessnetwork/b7s/consensus"
 	"github.com/blocklessnetwork/b7s/consensus/pbft"
 	"github.com/blocklessnetwork/b7s/consensus/raft"
@@ -14,7 +16,6 @@ import (
 	"github.com/blocklessnetwork/b7s/models/request"
 	"github.com/blocklessnetwork/b7s/models/response"
 	"github.com/blocklessnetwork/b7s/telemetry/tracing"
-	"github.com/libp2p/go-libp2p/core/peer"
 )
 
 // consensusExecutor defines the interface we have for managing clustered execution.
@@ -37,13 +38,13 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 		if err != nil {
 			w.Log().Warn().Err(err).Msg("could not get metadata")
 		}
+		res.Metadata = metadata
 
 		// TODO: Think: response.WorkOrder vs execute.Result vs execute.NodeResult => which one makes the most sense where
 		msg := response.WorkOrder{
 			Code:      res.Code,
 			RequestID: fc.RequestID,
-			Result:    res.Result,
-			Metadata:  metadata,
+			Result:    res,
 		}
 
 		err = w.Send(ctx, req.Origin, &msg)
@@ -54,7 +55,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 
 	// Add a callback function to cache the execution result
 	cacheFn := func(req raft.FSMLogEntry, res execute.NodeResult) {
-		w.executeResponses.Set(req.RequestID, res.Result)
+		w.executeResponses.Set(req.RequestID, res)
 	}
 
 	rh, err := raft.New(
@@ -83,7 +84,7 @@ func (w *Worker) createRaftCluster(ctx context.Context, from peer.ID, fc request
 func (w *Worker) createPBFTCluster(ctx context.Context, from peer.ID, fc request.FormCluster) error {
 
 	cacheFn := func(requestID string, origin peer.ID, req execute.Request, res execute.NodeResult) {
-		w.executeResponses.Set(fc.RequestID, res.Result)
+		w.executeResponses.Set(fc.RequestID, res)
 	}
 
 	// If we have tracing enabled we will have trace info in the context.
@@ -127,8 +128,8 @@ func (w *Worker) leaveCluster(requestID string, timeout time.Duration) error {
 
 	// TODO: Fix this logging.
 	w.Log().Info().
-		Str("request", requestID).
 		Stringer("consensus", cluster.Consensus()).
+		Str("request", requestID).
 		Msg("leaving consensus cluster")
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)

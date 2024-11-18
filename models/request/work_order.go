@@ -27,7 +27,9 @@ func (w WorkOrder) Response(c codes.Code, res execute.Result) *response.WorkOrde
 		BaseMessage: blockless.BaseMessage{TraceInfo: w.TraceInfo},
 		Code:        c,
 		RequestID:   w.RequestID,
-		Result:      res,
+		Result: execute.NodeResult{
+			Result: res,
+		},
 	}
 }
 

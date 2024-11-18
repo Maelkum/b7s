@@ -51,18 +51,13 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 
 			h.Log().Info().Stringer("peer", sender).Str("request", requestID).Msg("accounted execution response from peer")
 
-			er, ok := res[sender]
-			if !ok {
-				return
-			}
-
 			pub, err := sender.ExtractPublicKey()
 			if err != nil {
 				h.Log().Error().Err(err).Msg("could not derive public key from peer ID")
 				return
 			}
 
-			err = er.VerifySignature(pub)
+			err = res.VerifySignature(pub)
 			if err != nil {
 				h.Log().Error().Err(err).Msg("could not verify signature of an execution response")
 				return
@@ -71,16 +66,16 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 			lock.Lock()
 			defer lock.Unlock()
 
-			reskey := peerResultMapKey(er)
+			reskey := peerResultMapKey(res)
 			result, ok := results[reskey]
 			if !ok {
 				results[reskey] = aggregatedResult{
-					result: er.Result,
+					result: res.Result,
 					peers: []peer.ID{
 						sender,
 					},
 					metadata: map[peer.ID]any{
-						sender: er.Metadata,
+						sender: res.Metadata,
 					},
 				}
 				return
@@ -88,7 +83,7 @@ func (h *HeadNode) gatherExecutionResultsPBFT(ctx context.Context, requestID str
 
 			// Record which peers have this result, and their metadata.
 			result.peers = append(result.peers, sender)
-			result.metadata[sender] = er.Metadata
+			result.metadata[sender] = res.Metadata
 
 			results[reskey] = result
 
@@ -126,29 +121,26 @@ func (h *HeadNode) gatherExecutionResults(ctx context.Context, requestID string,
 
 	wg.Add(len(peers))
 
+	// TODO: Replace this above with a syncmap; same for the previous function.
+
 	// Wait on peers asynchronously.
 	for _, rp := range peers {
 		rp := rp
 
-		go func() {
+		go func(peer peer.ID) {
 			defer wg.Done()
-			key := executionResultKey(requestID, rp)
+			key := executionResultKey(requestID, peer)
 			res, ok := h.executeResponses.WaitFor(exctx, key)
 			if !ok {
 				return
 			}
 
-			h.Log().Info().Str("peer", rp.String()).Msg("accounted execution response from peer")
-
-			exres, ok := res[rp]
-			if !ok {
-				return
-			}
+			h.Log().Info().Str("peer", peer.String()).Msg("accounted execution response from peer")
 
 			reslock.Lock()
 			defer reslock.Unlock()
-			results[rp] = exres
-		}()
+			results[peer] = res
+		}(rp)
 	}
 
 	wg.Wait()

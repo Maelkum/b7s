@@ -24,7 +24,7 @@ func (h *HeadNode) processExecute(ctx context.Context, from peer.ID, req request
 
 	err := req.Valid()
 	if err != nil {
-		err = h.Send(ctx, from, req.Response(codes.Invalid).WithErrorMessage(err))
+		err = h.Send(ctx, from, req.Response(codes.Invalid, "").WithErrorMessage(err))
 		if err != nil {
 			return fmt.Errorf("could not send response: %w", err)
 		}
@@ -35,17 +35,17 @@ func (h *HeadNode) processExecute(ctx context.Context, from peer.ID, req request
 
 	log := h.Log().With().
 		Stringer("peer", from).
-		Str("request", req.RequestID).
+		Str("request", requestID).
 		Str("function", req.FunctionID).Logger()
 
-	code, results, cluster, err := h.headExecute(ctx, requestID, req.Request, req.Topic)
+	code, results, cluster, err := h.execute(ctx, requestID, req.Request, req.Topic)
 	if err != nil {
 		log.Error().Err(err).Msg("execution failed")
 	}
 
 	log.Info().Stringer("code", code).Msg("execution complete")
 
-	res := req.Response(code).WithResults(results).WithCluster(cluster)
+	res := req.Response(code, requestID).WithResults(results).WithCluster(cluster)
 	// Communicate the reason for failure in these cases.
 	if errors.Is(err, blockless.ErrRollCallTimeout) || errors.Is(err, blockless.ErrExecutionNotEnoughNodes) {
 		res.ErrorMessage = err.Error()
@@ -62,7 +62,7 @@ func (h *HeadNode) processExecute(ctx context.Context, from peer.ID, req request
 
 // headExecute is called on the head node. The head node will publish a roll call and delegate an execution request to chosen nodes.
 // The returned map contains execution results, mapped to the peer IDs of peers who reported them.
-func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execute.Request, subgroup string) (codes.Code, execute.ResultMap, execute.Cluster, error) {
+func (h *HeadNode) execute(ctx context.Context, requestID string, req execute.Request, subgroup string) (codes.Code, execute.ResultMap, execute.Cluster, error) {
 
 	h.Metrics().IncrCounterWithLabels(functionExecutionsMetric, 1,
 		[]metrics.Label{
@@ -130,8 +130,8 @@ func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execut
 
 	// Phase 3. - Request execution.
 
-	// Send the execution request to peers in the cluster. Non-leaders will drop the request.
-	reqExecute := request.Execute{
+	// Send the work order to peers in the cluster. Non-leaders will drop the request.
+	reqExecute := request.WorkOrder{
 		Request:   req,
 		RequestID: requestID,
 		Timestamp: time.Now().UTC(),
@@ -191,7 +191,7 @@ func (h *HeadNode) headExecute(ctx context.Context, requestID string, req execut
 	return retcode, results, cluster, nil
 }
 
-func (h *HeadNode) processExecuteResponse(ctx context.Context, from peer.ID, res response.Execute) error {
+func (h *HeadNode) processWorkOrderResponse(ctx context.Context, from peer.ID, res response.WorkOrder) error {
 
 	h.Log().Debug().
 		Stringer("from", from).
@@ -199,7 +199,7 @@ func (h *HeadNode) processExecuteResponse(ctx context.Context, from peer.ID, res
 		Msg("received execution response")
 
 	key := executionResultKey(res.RequestID, from)
-	h.executeResponses.Set(key, res.Results)
+	h.executeResponses.Set(key, res.Result)
 
 	return nil
 }

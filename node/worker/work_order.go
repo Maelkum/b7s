@@ -38,6 +38,11 @@ func (w *Worker) processWorkOrder(ctx context.Context, from peer.ID, req request
 		log.Error().Err(err).Stringer("peer", from).Msg("execution failed")
 	}
 
+	metadata, err := w.cfg.MetadataProvider.Metadata(req.Request, result.Result)
+	if err != nil {
+		log.Error().Err(err).Msg("could not get metadata for the execution result")
+	}
+
 	switch code {
 
 	case codes.NoContent:
@@ -46,13 +51,10 @@ func (w *Worker) processWorkOrder(ctx context.Context, from peer.ID, req request
 		return nil
 
 	case codes.OK:
-		w.executeResponses.Set(requestID, result)
+		w.executeResponses.Set(requestID, execute.NodeResult{Result: result, Metadata: metadata})
 	}
 
-	metadata, err := w.cfg.MetadataProvider.Metadata(req.Request, result.Result)
-	if err != nil {
-		log.Error().Err(err).Msg("could not get metadata for the execution result")
-	}
+	// TODO: Remaining response fields.
 
 	// Prepare a work order response.
 	res := req.Response(code, result).WithMetadata(metadata)

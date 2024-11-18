@@ -16,7 +16,7 @@ type HeadNode struct {
 
 	rollCall           *rollCallQueue
 	consensusResponses *waitmap.WaitMap[string, response.FormCluster]
-	executeResponses   *waitmap.WaitMap[string, execute.ResultMap]
+	executeResponses   *waitmap.WaitMap[string, execute.NodeResult]
 
 	cfg Config
 }
@@ -44,7 +44,7 @@ func New(node node.Core, options ...Option) (*HeadNode, error) {
 
 		rollCall:           newQueue(rollCallQueueBufferSize),
 		consensusResponses: waitmap.New[string, response.FormCluster](0),
-		executeResponses:   waitmap.New[string, execute.ResultMap](executionResultCacheSize),
+		executeResponses:   waitmap.New[string, execute.NodeResult](executionResultCacheSize),
 	}
 
 	return head, nil

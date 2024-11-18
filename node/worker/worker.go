@@ -31,7 +31,7 @@ type Worker struct {
 	clusters *syncmap.Map[string, consensusExecutor]
 
 	// TODO: This no longer needs to be a waitmap for the worker.
-	executeResponses *waitmap.WaitMap[string, execute.Result]
+	executeResponses *waitmap.WaitMap[string, execute.NodeResult]
 }
 
 func New(node node.Core, fstore FStore, executor blockless.Executor, options ...Option) (*Worker, error) {

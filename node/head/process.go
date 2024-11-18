@@ -72,8 +72,8 @@ func (h *HeadNode) processMessage(ctx context.Context, from peer.ID, payload []b
 		return node.HandleMessage(ctx, from, payload, h.processRollCallResponse)
 	case blockless.MessageExecute:
 		return node.HandleMessage(ctx, from, payload, h.processExecute)
-	case blockless.MessageExecuteResponse:
-		return node.HandleMessage(ctx, from, payload, h.processExecuteResponse)
+	case blockless.MessageWorkOrderResponse:
+		return node.HandleMessage(ctx, from, payload, h.processWorkOrderResponse)
 	case blockless.MessageFormClusterResponse:
 		return node.HandleMessage(ctx, from, payload, h.processFormClusterResponse)
 
