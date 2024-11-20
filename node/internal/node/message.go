@@ -47,7 +47,7 @@ func (c *core) Subscribe(ctx context.Context, topic string) error {
 // send serializes the message and sends it to the specified peer.
 func (c *core) Send(ctx context.Context, to peer.ID, msg blockless.Message) error {
 
-	opts := new(MessageSpanConfig).Pipeline(DirectMessagePipeline()).Peer(to).SpanOpts()
+	opts := new(messageSpanConfig).pipeline(DirectMessagePipeline).peer(to).spanOpts()
 	ctx, span := c.tracer.Start(ctx, msgSendSpanName(spanMessageSend, msg.Type()), opts...)
 	defer span.End()
 
@@ -73,8 +73,7 @@ func (c *core) Send(ctx context.Context, to peer.ID, msg blockless.Message) erro
 // sendToMany serializes the message and sends it to a number of peers. `requireAll` dictates how we treat partial errors.
 func (c *core) SendToMany(ctx context.Context, peers []peer.ID, msg blockless.Message, requireAll bool) error {
 
-	// TODO: Do these configs need to be public?
-	opts := new(MessageSpanConfig).Pipeline(DirectMessagePipeline()).Peers(peers...).SpanOpts()
+	opts := new(messageSpanConfig).pipeline(DirectMessagePipeline).peers(peers...).spanOpts()
 	ctx, span := c.tracer.Start(ctx, msgSendSpanName(spanMessageSend, msg.Type()), opts...)
 	defer span.End()
 
@@ -132,7 +131,7 @@ func (c *core) Publish(ctx context.Context, msg blockless.Message) error {
 
 func (c *core) PublishToTopic(ctx context.Context, topic string, msg blockless.Message) error {
 
-	opts := new(MessageSpanConfig).Pipeline(PubSubPipeline(topic)).SpanOpts()
+	opts := new(messageSpanConfig).pipeline(PubSubPipeline(topic)).spanOpts()
 	ctx, span := c.tracer.Start(ctx, msgSendSpanName(spanMessagePublish, msg.Type()), opts...)
 	defer span.End()
 

@@ -25,17 +25,17 @@ func saveTraceContext(ctx context.Context, msg blockless.Message) {
 	}
 }
 
-type MessageSpanConfig struct {
+type messageSpanConfig struct {
 	msgPipeline Pipeline
 	receivers   []peer.ID
 }
 
-func (c *MessageSpanConfig) Pipeline(p Pipeline) *MessageSpanConfig {
+func (c *messageSpanConfig) pipeline(p Pipeline) *messageSpanConfig {
 	c.msgPipeline = p
 	return c
 }
 
-func (c *MessageSpanConfig) Peer(id peer.ID) *MessageSpanConfig {
+func (c *messageSpanConfig) peer(id peer.ID) *messageSpanConfig {
 	if c.receivers == nil {
 		c.receivers = make([]peer.ID, 0, 1)
 	}
@@ -44,7 +44,7 @@ func (c *MessageSpanConfig) Peer(id peer.ID) *MessageSpanConfig {
 	return c
 }
 
-func (c *MessageSpanConfig) Peers(ids ...peer.ID) *MessageSpanConfig {
+func (c *messageSpanConfig) peers(ids ...peer.ID) *messageSpanConfig {
 	if c.receivers == nil {
 		c.receivers = make([]peer.ID, 0, len(ids))
 	}
@@ -53,7 +53,7 @@ func (c *MessageSpanConfig) Peers(ids ...peer.ID) *MessageSpanConfig {
 	return c
 }
 
-func (c *MessageSpanConfig) SpanOpts() []trace.SpanStartOption {
+func (c *messageSpanConfig) spanOpts() []trace.SpanStartOption {
 
 	attrs := []attribute.KeyValue{
 		b7ssemconv.MessagePipeline.String(c.msgPipeline.ID.String()),

@@ -29,6 +29,8 @@ type Pipeline struct {
 	Topic string     // optional - topic on which this message was published.
 }
 
+var DirectMessagePipeline = Pipeline{ID: DirectMessage}
+
 func (p Pipeline) String() string {
 
 	switch p.ID {
@@ -38,10 +40,6 @@ func (p Pipeline) String() string {
 	default:
 		return p.ID.String()
 	}
-}
-
-func DirectMessagePipeline() Pipeline {
-	return Pipeline{ID: DirectMessage}
 }
 
 func PubSubPipeline(topic string) Pipeline {

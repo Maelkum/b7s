@@ -10,6 +10,8 @@ const (
 	ClusterAddressTTL = 30 * time.Minute
 
 	consensusClusterSendTimeout = 10 * time.Second
+
+	syncInterval = time.Hour // How often do we recheck function installations.
 )
 
 // Raft and consensus related parameters.

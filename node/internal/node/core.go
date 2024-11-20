@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"time"
 
 	"github.com/armon/go-metrics"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -15,24 +16,21 @@ import (
 
 type Core interface {
 	Logger
-	Host
+	Network
 	Telemetry
+	NodeOps
 }
 
 type Logger interface {
 	Log() *zerolog.Logger
 }
 
-// TODO: Improve this naming - both Host nad Network.
-
-type Host interface {
-	// TODO: Perhaps abstract this away
-	Host() *host.Host
-
-	Network
+type Network interface {
+	Host() *host.Host // TODO Further abstract away Host()
+	Messaging
 }
 
-type Network interface {
+type Messaging interface {
 	Connected(peer.ID) bool
 
 	Send(context.Context, peer.ID, blockless.Message) error
@@ -47,6 +45,11 @@ type Network interface {
 type Telemetry interface {
 	Tracer() *tracing.Tracer
 	Metrics() *metrics.Metrics
+}
+
+type NodeOps interface {
+	Run(context.Context)
+	SetupRunFunc(healthInterval time.Duration, concurrency uint, process ProcessFunc) RunFunc
 }
 
 type core struct {
