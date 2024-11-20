@@ -121,8 +121,6 @@ func (h *HeadNode) gatherExecutionResults(ctx context.Context, requestID string,
 
 	wg.Add(len(peers))
 
-	// TODO: Replace this above with a syncmap; same for the previous function.
-
 	// Wait on peers asynchronously.
 	for _, rp := range peers {
 		rp := rp

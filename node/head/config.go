@@ -21,8 +21,6 @@ var DefaultConfig = Config{
 	DefaultConsensus:        DefaultConsensusAlgorithm,
 }
 
-// TODO: Head node does not need to subscribe to topics at all.
-
 // Config represents the Node configuration.
 type Config struct {
 	Topics                  []string       // Topics to subscribe to.

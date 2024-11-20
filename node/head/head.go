@@ -29,8 +29,6 @@ func New(node node.Core, options ...Option) (*HeadNode, error) {
 		option(&cfg)
 	}
 
-	// TODO: Make sure default topic is included in main (also worker).
-
 	err := cfg.Valid()
 	if err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)

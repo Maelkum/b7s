@@ -2,7 +2,6 @@ package worker
 
 import (
 	"fmt"
-	"slices"
 	"sync"
 
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
@@ -45,13 +44,6 @@ func New(node node.Core, fstore FStore, executor blockless.Executor, options ...
 	err := cfg.Valid()
 	if err != nil {
 		return nil, fmt.Errorf("invalid configuration: %w", err)
-	}
-
-	// TODO: Do this in main.
-	// Ensure default topic is included in the topic list.
-	defaultSubscription := slices.Contains(cfg.Topics, blockless.DefaultTopic)
-	if !defaultSubscription {
-		cfg.Topics = append(cfg.Topics, blockless.DefaultTopic)
 	}
 
 	// TODO: Tracing

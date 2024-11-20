@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"slices"
 
 	"github.com/cockroachdb/pebble"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -261,8 +262,14 @@ func run() int {
 	fstore := fstore.New(log.With().Str("component", "fstore").Logger(), store, cfg.Workspace)
 
 	// If we have topics specified, use those.
+	// Ensure default topic is included in the topic list.
 	if len(cfg.Topics) > 0 {
-		opts = append(opts, node.WithTopics(cfg.Topics))
+
+		topics := cfg.Topics
+		if !slices.Contains(topics, blockless.DefaultTopic) {
+			topics = append(topics, blockless.DefaultTopic)
+		}
+		opts = append(opts, node.WithTopics(topics))
 	}
 
 	// Instantiate node.
