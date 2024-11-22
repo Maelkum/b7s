@@ -70,7 +70,7 @@ func (h *HeadNode) execute(ctx context.Context, requestID string, req execute.Re
 			{Name: "consensus", Value: req.Config.ConsensusAlgorithm},
 		})
 
-	ctx, span := h.Tracer().Start(ctx, spanHeadExecute,
+	ctx, span := h.Tracer().Start(ctx, spanExecute,
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(tracing.ExecutionAttributes(requestID, req)...))
 	defer span.End()

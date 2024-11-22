@@ -145,9 +145,3 @@ func (h *HeadNode) gatherExecutionResults(ctx context.Context, requestID string,
 
 	return results
 }
-
-func singleNodeResultMap(id peer.ID, res execute.NodeResult) execute.ResultMap {
-	return map[peer.ID]execute.NodeResult{
-		id: res,
-	}
-}
