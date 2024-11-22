@@ -10,14 +10,13 @@ const (
 	spanPeerConnected    = "PeerConnected"
 	spanPeerDisconnected = "PeerDisconnected"
 
-	// TODO: Rename this to just execute.
 	// execution events
-	spanHeadExecute = "HeadExecute"
+	spanExecute = "Execute"
 )
 
 var (
 	rollCallsPublishedMetric = []string{"node", "rollcalls", "published"}
-	functionExecutionsMetric = []string{"node", "function", "executions"}
+	executionsMetric         = []string{"node", "function", "executions"}
 )
 
 var Counters = []prometheus.CounterDefinition{
@@ -26,7 +25,7 @@ var Counters = []prometheus.CounterDefinition{
 		Help: "Number of roll calls this node issued.",
 	},
 	{
-		Name: functionExecutionsMetric,
+		Name: executionsMetric,
 		Help: "Number of function executions.",
 	},
 }

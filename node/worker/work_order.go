@@ -19,7 +19,7 @@ import (
 
 func (w *Worker) processWorkOrder(ctx context.Context, from peer.ID, req request.WorkOrder) error {
 
-	w.Metrics().IncrCounterWithLabels(functionExecutionsMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
+	w.Metrics().IncrCounterWithLabels(workOrderMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
 
 	requestID := req.RequestID
 	if requestID == "" {

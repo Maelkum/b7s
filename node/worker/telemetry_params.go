@@ -9,16 +9,15 @@ const (
 	spanWorkOrder = "WorkOrder"
 )
 
-// TODO: CHeck - duplicate span/metric definitions.
+// TODO: Check - duplicate span/metric definitions.
 
 var (
-	rollCallsSeenMetric      = []string{"node", "rollcalls", "seen"}
-	rollCallsAppliedMetric   = []string{"node", "rollcalls", "applied"}
-	functionExecutionsMetric = []string{"node", "function", "executions"}
+	rollCallsSeenMetric    = []string{"node", "rollcalls", "seen"}
+	rollCallsAppliedMetric = []string{"node", "rollcalls", "applied"}
+	workOrderMetric        = []string{"node", "workorders"}
 )
 
 var Counters = []prometheus.CounterDefinition{
-
 	{
 		Name: rollCallsSeenMetric,
 		Help: "Number of roll calls seen by the node.",
@@ -28,7 +27,7 @@ var Counters = []prometheus.CounterDefinition{
 		Help: "Number of roll calls this node applied to.",
 	},
 	{
-		Name: functionExecutionsMetric,
-		Help: "Number of function executions.",
+		Name: workOrderMetric,
+		Help: "Number of work orders.",
 	},
 }

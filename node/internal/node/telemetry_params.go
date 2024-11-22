@@ -30,9 +30,10 @@ var (
 	messagesSentMetric      = []string{"node", "messages", "sent"}
 	messagesPublishedMetric = []string{"node", "messages", "published"}
 	subscriptionsMetric     = []string{"node", "topic", "subscriptions"}
+	directMessagesMetric    = []string{"node", "direct", "messages"}
+	topicMessagesMetric     = []string{"node", "topic", "messages"}
 
-	directMessagesMetric = []string{"node", "direct", "messages"}
-	topicMessagesMetric  = []string{"node", "topic", "messages"}
+	nodeInfoMetric = []string{"node", "info"}
 )
 
 // TODO: Descriptions for metrics
@@ -45,5 +46,20 @@ var Counters = []prometheus.CounterDefinition{
 	{
 		Name: topicMessagesMetric,
 		Help: "Number of topic messages this node received.",
+	},
+	{
+		Name: messagesSentMetric,
+		Help: "Number of messages sent.",
+	},
+	{
+		Name: messagesPublishedMetric,
+		Help: "Number of messages published.",
+	},
+}
+
+var Gauges = []prometheus.GaugeDefinition{
+	{
+		Name: nodeInfoMetric,
+		Help: "Information about the b7s node.",
 	},
 }
