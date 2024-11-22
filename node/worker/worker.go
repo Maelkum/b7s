@@ -1,10 +1,12 @@
 package worker
 
 import (
+	"context"
 	"fmt"
-	"sync"
 
+	"github.com/armon/go-metrics"
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
+	"github.com/blocklessnetwork/b7s/info"
 	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/node/internal/node"
@@ -20,9 +22,6 @@ type Worker struct {
 	executor blockless.Executor
 	fstore   FStore
 
-	sema chan struct{}
-	wg   *sync.WaitGroup
-	//	subgroups  workSubgroups
 	attributes *attributes.Attestation
 
 	// TODO: Update cluster map, don't use this.
@@ -33,7 +32,7 @@ type Worker struct {
 	executeResponses *waitmap.WaitMap[string, execute.NodeResult]
 }
 
-func New(node node.Core, fstore FStore, executor blockless.Executor, options ...Option) (*Worker, error) {
+func New(core node.Core, fstore FStore, executor blockless.Executor, options ...Option) (*Worker, error) {
 
 	// Initialize config.
 	cfg := DefaultConfig
@@ -49,12 +48,46 @@ func New(node node.Core, fstore FStore, executor blockless.Executor, options ...
 	// TODO: Tracing
 
 	worker := &Worker{
-		Core:     node,
+		Core:     core,
 		fstore:   fstore,
 		executor: executor,
-
 		clusters: syncmap.New[string, consensusExecutor](),
 	}
 
+	if cfg.LoadAttributes {
+
+		attributes, err := loadAttributes(core.Host().PublicKey())
+		if err != nil {
+			return nil, fmt.Errorf("could not load attribute data: %w", err)
+		}
+
+		core.Log().Info().
+			Any("attributes", attributes).
+			Msg("node loaded attributes")
+
+		worker.attributes = &attributes
+	}
+
+	worker.Metrics().SetGaugeWithLabels(node.NodeInfoMetric, 1,
+		[]metrics.Label{
+			{Name: "id", Value: worker.ID()},
+			{Name: "version", Value: info.VcsVersion()},
+			{Name: "role", Value: "worker"},
+		})
+
 	return worker, nil
+}
+
+func (w *Worker) Run(ctx context.Context) error {
+
+	// Sync functions now in case they were removed from the storage.
+	err := w.fstore.Sync(ctx, false)
+	if err != nil {
+		return fmt.Errorf("could not sync functions: %w", err)
+	}
+
+	// Start the function sync in the background to periodically check functions.
+	go w.runSyncLoop(ctx)
+
+	return w.Core.Run(ctx, w.processMessage)
 }

@@ -2,16 +2,13 @@ package node
 
 import (
 	"fmt"
-	"slices"
 	"sync"
 
 	"github.com/armon/go-metrics"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
 	"github.com/blocklessnetwork/b7s/host"
-	"github.com/blocklessnetwork/b7s/info"
 	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/models/response"
@@ -58,23 +55,6 @@ type Node struct {
 // New creates a new Node.
 func New(log zerolog.Logger, host *host.Host, store blockless.PeerStore, fstore FStore, options ...Option) (*Node, error) {
 
-	// Initialize config.
-	cfg := DefaultConfig
-	for _, option := range options {
-		option(&cfg)
-	}
-
-	// Ensure default topic is included in the topic list.
-	defaultSubscription := slices.Contains(cfg.Topics, DefaultTopic)
-	if !defaultSubscription {
-		cfg.Topics = append(cfg.Topics, DefaultTopic)
-	}
-
-	subgroups := workSubgroups{
-		RWMutex: &sync.RWMutex{},
-		topics:  make(map[string]*topicInfo),
-	}
-
 	n := &Node{
 		cfg: cfg,
 
@@ -96,16 +76,6 @@ func New(log zerolog.Logger, host *host.Host, store blockless.PeerStore, fstore 
 		metrics: metrics.Default(),
 	}
 
-	if cfg.LoadAttributes {
-		attributes, err := loadAttributes(host.PublicKey())
-		if err != nil {
-			return nil, fmt.Errorf("could not load attribute data: %w", err)
-		}
-
-		n.attributes = &attributes
-		n.log.Info().Interface("attributes", n.attributes).Msg("node loaded attributes")
-	}
-
 	err := n.ValidateConfig()
 	if err != nil {
 		return nil, fmt.Errorf("node configuration is not valid: %w", err)
@@ -115,20 +85,5 @@ func New(log zerolog.Logger, host *host.Host, store blockless.PeerStore, fstore 
 	cn := newConnectionNotifee(log, store)
 	host.Network().Notify(cn)
 
-	n.metrics.SetGaugeWithLabels(nodeInfoMetric, 1, []metrics.Label{
-		{Name: "id", Value: n.ID()},
-		{Name: "version", Value: info.VcsVersion()},
-		{Name: "role", Value: n.cfg.Role.String()},
-	})
-
 	return n, nil
-}
-
-// ID returns the ID of this node.
-func (n *Node) ID() string {
-	return n.host.ID().String()
-}
-
-func newRequestID() string {
-	return uuid.New().String()
 }

@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"time"
 
 	"github.com/armon/go-metrics"
 	"github.com/libp2p/go-libp2p/core/peer"
@@ -15,6 +14,8 @@ import (
 )
 
 type Core interface {
+	ID() string
+
 	Logger
 	Network
 	Telemetry
@@ -48,11 +49,12 @@ type Telemetry interface {
 }
 
 type NodeOps interface {
-	Run(context.Context)
-	SetupRunFunc(healthInterval time.Duration, concurrency uint, process ProcessFunc) RunFunc
+	Run(context.Context, ProcessFunc) error
 }
 
 type core struct {
+	cfg Config
+
 	log  zerolog.Logger
 	host *host.Host
 
@@ -63,9 +65,15 @@ type core struct {
 	metrics *metrics.Metrics
 }
 
-func NewCore(log zerolog.Logger, host *host.Host) *core {
+func NewCore(log zerolog.Logger, host *host.Host, opts ...Option) *core {
+
+	cfg := DefaultConfig
+	for _, opt := range opts {
+		opt(&cfg)
+	}
 
 	core := &core{
+		cfg:  cfg,
 		log:  log,
 		host: host,
 		// tracer:   tracing.NewTracer(tracerName),
@@ -74,6 +82,11 @@ func NewCore(log zerolog.Logger, host *host.Host) *core {
 	}
 
 	return core
+}
+
+// ID returns the ID of this node.
+func (c *core) ID() string {
+	return c.host.ID().String()
 }
 
 func (c *core) Log() *zerolog.Logger {

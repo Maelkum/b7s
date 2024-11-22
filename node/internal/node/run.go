@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/armon/go-metrics"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
@@ -19,111 +18,109 @@ import (
 
 type (
 	ProcessFunc func(ctx context.Context, from peer.ID, data []byte, pipeline Pipeline) error
-	RunFunc     func(context.Context) error
 )
 
-func (c *core) SetupRunFunc(healthInterval time.Duration, concurrency uint, process ProcessFunc) RunFunc {
+// Run will start the main loop for the node.
+func (c *core) Run(ctx context.Context, process ProcessFunc) error {
 
-	return func(ctx context.Context) error {
-
-		topics := c.topics.Keys()
-		for _, topic := range topics {
-			err := c.Subscribe(ctx, topic)
-			if err != nil {
-				return fmt.Errorf("could not subscribe to topic (topic: %s): %w", topic, err)
-			}
-		}
-
-		err := c.host.ConnectToKnownPeers(ctx)
+	topics := c.topics.Keys()
+	for _, topic := range topics {
+		err := c.Subscribe(ctx, topic)
 		if err != nil {
-			return fmt.Errorf("could not connect to known peers: %w", err)
+			return fmt.Errorf("could not subscribe to topic (topic: %s): %w", topic, err)
 		}
-
-		c.listenDirectMessages(ctx, process)
-
-		// Discover peers.
-		// NOTE: Potentially signal any error here so that we abort the node
-		// run loop if anything failed.
-		for _, topic := range topics {
-			go func(topic string) {
-
-				// TODO: Check DHT initialization, now that we're working with multiple topics, may not need to repeat ALL work per topic.
-				err := c.Host().DiscoverPeers(ctx, topic)
-				if err != nil {
-					c.Log().Error().Err(err).Msg("could not discover peers")
-				}
-			}(topic)
-		}
-
-		c.log.Info().Uint("concurrency", concurrency).Msg("starting node main loop")
-
-		var (
-			workers sync.WaitGroup
-			wg      sync.WaitGroup
-			sema    chan struct{} = make(chan struct{}, concurrency)
-		)
-
-		// Process topic messages - spin up a goroutine for each topic that will feed the main processing loop below.
-		// No need for locking since we're still single threaded here and these (subscribed) topics will not be touched by other code.
-		for _, topicName := range c.topics.Keys() {
-
-			topic, _ := c.topics.Get(topicName)
-
-			workers.Add(1)
-
-			go func(name string, subscription *pubsub.Subscription) {
-				defer workers.Done()
-
-				// Message processing loops.
-				for {
-
-					// Retrieve next message.
-					msg, err := subscription.Next(ctx)
-					if err != nil {
-						// NOTE: Cancelling the context will lead us here.
-						c.log.Error().Err(err).Msg("could not receive message")
-						break
-					}
-
-					// Skip messages we published.
-					if msg.ReceivedFrom == c.host.ID() {
-						continue
-					}
-
-					c.log.Trace().Str("topic", name).Str("peer", msg.ReceivedFrom.String()).Hex("id", []byte(msg.ID)).Msg("received message")
-
-					// Try to get a slot for processing the request.
-					sema <- struct{}{}
-					wg.Add(1)
-
-					go func(msg *pubsub.Message) {
-						// Free up slot after we're done.
-						defer wg.Done()
-						defer func() { <-sema }()
-
-						c.metrics.IncrCounterWithLabels(topicMessagesMetric, 1, []metrics.Label{{Name: "topic", Value: name}})
-
-						err = process(ctx, msg.ReceivedFrom, msg.GetData(), PubSubPipeline(name))
-						if err != nil {
-							c.log.Error().Err(err).Str("id", msg.ID).Str("peer", msg.ReceivedFrom.String()).Msg("could not process message")
-							return
-						}
-
-					}(msg)
-				}
-			}(topicName, topic.subscription)
-		}
-
-		workers.Wait()
-
-		c.log.Debug().Msg("waiting for messages being processed")
-		wg.Wait()
-
-		// Start the health signal emitter in a separate goroutine.
-		go c.emitHealthPing(ctx, healthInterval)
-
-		return nil
 	}
+
+	err := c.host.ConnectToKnownPeers(ctx)
+	if err != nil {
+		return fmt.Errorf("could not connect to known peers: %w", err)
+	}
+
+	// Set the handler for direct messages.
+	c.listenDirectMessages(ctx, process)
+
+	// Discover peers.
+	// NOTE: Potentially signal any error here so that we abort the node
+	// run loop if anything failed.
+	for _, topic := range topics {
+		go func(topic string) {
+
+			// TODO: Check DHT initialization, now that we're working with multiple topics, may not need to repeat ALL work per topic.
+			err := c.Host().DiscoverPeers(ctx, topic)
+			if err != nil {
+				c.Log().Error().Err(err).Msg("could not discover peers")
+			}
+		}(topic)
+	}
+
+	c.log.Info().Uint("concurrency", c.cfg.Concurrency).Msg("starting node main loop")
+
+	var (
+		workers sync.WaitGroup
+		wg      sync.WaitGroup
+		sema    chan struct{} = make(chan struct{}, c.cfg.Concurrency)
+	)
+
+	// Process topic messages - spin up a goroutine for each topic that will feed the main processing loop below.
+	// No need for locking since we're still single threaded here and these (subscribed) topics will not be touched by other code.
+	for _, topicName := range c.topics.Keys() {
+
+		topic, _ := c.topics.Get(topicName)
+
+		workers.Add(1)
+
+		go func(name string, subscription *pubsub.Subscription) {
+			defer workers.Done()
+
+			// Message processing loops.
+			for {
+
+				// Retrieve next message.
+				msg, err := subscription.Next(ctx)
+				if err != nil {
+					// NOTE: Cancelling the context will lead us here.
+					c.log.Error().Err(err).Msg("could not receive message")
+					break
+				}
+
+				// Skip messages we published.
+				if msg.ReceivedFrom == c.host.ID() {
+					continue
+				}
+
+				c.log.Trace().Str("topic", name).Str("peer", msg.ReceivedFrom.String()).Hex("id", []byte(msg.ID)).Msg("received message")
+
+				// Try to get a slot for processing the request.
+				sema <- struct{}{}
+				wg.Add(1)
+
+				go func(msg *pubsub.Message) {
+					// Free up slot after we're done.
+					defer wg.Done()
+					defer func() { <-sema }()
+
+					c.metrics.IncrCounterWithLabels(topicMessagesMetric, 1, []metrics.Label{{Name: "topic", Value: name}})
+
+					err = process(ctx, msg.ReceivedFrom, msg.GetData(), PubSubPipeline(name))
+					if err != nil {
+						c.log.Error().Err(err).Str("id", msg.ID).Str("peer", msg.ReceivedFrom.String()).Msg("could not process message")
+						return
+					}
+
+				}(msg)
+			}
+		}(topicName, topic.subscription)
+	}
+
+	workers.Wait()
+
+	c.log.Debug().Msg("waiting for messages being processed")
+	wg.Wait()
+
+	// Start the health signal emitter in a separate goroutine.
+	go c.emitHealthPing(ctx, c.cfg.HealthInterval)
+
+	return nil
 }
 
 // listenDirectMessages will process messages sent directly to the peer (as opposed to published messages).

@@ -33,7 +33,7 @@ var (
 	directMessagesMetric    = []string{"node", "direct", "messages"}
 	topicMessagesMetric     = []string{"node", "topic", "messages"}
 
-	nodeInfoMetric = []string{"node", "info"}
+	NodeInfoMetric = []string{"node", "info"}
 )
 
 // TODO: Descriptions for metrics
@@ -59,7 +59,7 @@ var Counters = []prometheus.CounterDefinition{
 
 var Gauges = []prometheus.GaugeDefinition{
 	{
-		Name: nodeInfoMetric,
+		Name: NodeInfoMetric,
 		Help: "Information about the b7s node.",
 	},
 }
