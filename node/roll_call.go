@@ -11,84 +11,9 @@ import (
 	"github.com/blocklessnetwork/b7s/consensus"
 	"github.com/blocklessnetwork/b7s/consensus/pbft"
 	"github.com/blocklessnetwork/b7s/models/blockless"
-	"github.com/blocklessnetwork/b7s/models/codes"
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/models/request"
 )
-
-func (n *Node) processRollCall(ctx context.Context, from peer.ID, req request.RollCall) error {
-
-	// Only workers respond to roll calls at the moment.
-	if n.cfg.Role != blockless.WorkerNode {
-		n.log.Debug().Msg("skipping roll call as a non-worker node")
-		return nil
-	}
-
-	n.metrics.IncrCounterWithLabels(rollCallsSeenMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
-
-	log := n.log.With().Str("request", req.RequestID).Str("origin", req.Origin.String()).Str("function", req.FunctionID).Logger()
-	log.Debug().Msg("received roll call request")
-
-	// TODO: (raft) temporary measure - at the moment we don't support multiple raft clusters on the same node at the same time.
-	if req.Consensus == consensus.Raft && n.haveRaftClusters() {
-		log.Warn().Msg("cannot respond to a roll call as we're already participating in one raft cluster")
-		return nil
-	}
-
-	if req.Attributes != nil {
-
-		if n.attributes == nil {
-			log.Info().Msg("skipping attributed execution requested")
-			return nil
-		}
-
-		err := haveAttributes(*n.attributes, *req.Attributes)
-		if err != nil {
-			log.Info().Err(err).Msg("skipping attributed execution request - we do not match requested attributes")
-			return nil
-		}
-	}
-
-	// Check if we have this function installed.
-	installed, err := n.fstore.IsInstalled(req.FunctionID)
-	if err != nil {
-		sendErr := n.send(ctx, req.Origin, req.Response(codes.Error))
-		if sendErr != nil {
-			// Log send error but choose to return the original error.
-			log.Error().Err(sendErr).Str("to", req.Origin.String()).Msg("could not send response")
-		}
-
-		return fmt.Errorf("could not check if function is installed: %w", err)
-	}
-
-	// We don't have this function - install it now.
-	if !installed {
-
-		log.Info().Msg("roll call but function not installed, installing now")
-
-		err = n.installFunction(ctx, req.FunctionID, manifestURLFromCID(req.FunctionID))
-		if err != nil {
-			sendErr := n.send(ctx, req.Origin, req.Response(codes.Error))
-			if sendErr != nil {
-				// Log send error but choose to return the original error.
-				log.Error().Err(sendErr).Str("to", req.Origin.String()).Msg("could not send response")
-			}
-			return fmt.Errorf("could not install function: %w", err)
-		}
-	}
-
-	log.Info().Str("origin", req.Origin.String()).Msg("reporting for roll call")
-
-	n.metrics.IncrCounterWithLabels(rollCallsAppliedMetric, 1, []metrics.Label{{Name: "function", Value: req.FunctionID}})
-
-	// Send positive response.
-	err = n.send(ctx, req.Origin, req.Response(codes.Accepted))
-	if err != nil {
-		return fmt.Errorf("could not send response: %w", err)
-	}
-
-	return nil
-}
 
 func (n *Node) executeRollCall(
 	ctx context.Context,

@@ -66,22 +66,8 @@ func (n *Node) processMessage(ctx context.Context, from peer.ID, payload []byte,
 	log.Debug().Msg("received message from peer")
 
 	switch msgType {
-	case blockless.MessageRollCall:
-		return handleMessage(ctx, from, payload, n.processRollCall)
-	case blockless.MessageRollCallResponse:
-		return handleMessage(ctx, from, payload, n.processRollCallResponse)
-
 	case blockless.MessageExecute:
 		return handleMessage(ctx, from, payload, n.processExecute)
-	case blockless.MessageExecuteResponse:
-		return handleMessage(ctx, from, payload, n.processExecuteResponse)
-
-	case blockless.MessageFormCluster:
-		return handleMessage(ctx, from, payload, n.processFormCluster)
-	case blockless.MessageFormClusterResponse:
-		return handleMessage(ctx, from, payload, n.processFormClusterResponse)
-	case blockless.MessageDisbandCluster:
-		return handleMessage(ctx, from, payload, n.processDisbandCluster)
 
 	default:
 		return fmt.Errorf("unknown message type: %s", msgType)

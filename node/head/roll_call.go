@@ -140,8 +140,9 @@ func (h *HeadNode) publishRollCall(ctx context.Context, requestID string, functi
 func (h *HeadNode) processRollCallResponse(ctx context.Context, from peer.ID, res response.RollCall) error {
 
 	log := h.Log().With().
+		Stringer("peer", from).
 		Str("request", res.RequestID).
-		Stringer("peer", from).Logger()
+		Logger()
 
 	log.Debug().Msg("processing peer's roll call response")
 

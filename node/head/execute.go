@@ -196,7 +196,7 @@ func (h *HeadNode) processWorkOrderResponse(ctx context.Context, from peer.ID, r
 	h.Log().Debug().
 		Stringer("from", from).
 		Str("request", res.RequestID).
-		Msg("received execution response")
+		Msg("received work order response")
 
 	key := executionResultKey(res.RequestID, from)
 	h.executeResponses.Set(key, res.Result)

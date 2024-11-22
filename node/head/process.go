@@ -70,8 +70,6 @@ func (h *HeadNode) processMessage(ctx context.Context, from peer.ID, payload []b
 		return node.HandleMessage(ctx, from, payload, h.processHealthCheck)
 	case blockless.MessageInstallFunctionResponse:
 		return node.HandleMessage(ctx, from, payload, h.processInstallFunctionResponse)
-	case blockless.MessageRollCallResponse:
-		return node.HandleMessage(ctx, from, payload, h.processRollCallResponse)
 	case blockless.MessageExecute:
 		return node.HandleMessage(ctx, from, payload, h.processExecute)
 	case blockless.MessageWorkOrderResponse:
