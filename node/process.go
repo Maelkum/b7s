@@ -66,14 +66,6 @@ func (n *Node) processMessage(ctx context.Context, from peer.ID, payload []byte,
 	log.Debug().Msg("received message from peer")
 
 	switch msgType {
-	case blockless.MessageHealthCheck:
-		return handleMessage(ctx, from, payload, n.processHealthCheck)
-
-	case blockless.MessageInstallFunction:
-		return handleMessage(ctx, from, payload, n.processInstallFunction)
-	case blockless.MessageInstallFunctionResponse:
-		return handleMessage(ctx, from, payload, n.processInstallFunctionResponse)
-
 	case blockless.MessageRollCall:
 		return handleMessage(ctx, from, payload, n.processRollCall)
 	case blockless.MessageRollCallResponse:

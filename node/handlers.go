@@ -9,11 +9,6 @@ import (
 	"github.com/blocklessnetwork/b7s/models/response"
 )
 
-func (n *Node) processHealthCheck(ctx context.Context, from peer.ID, _ response.Health) error {
-	n.log.Trace().Str("from", from.String()).Msg("peer health check received")
-	return nil
-}
-
 func (n *Node) processRollCallResponse(ctx context.Context, from peer.ID, res response.RollCall) error {
 
 	log := n.log.With().Str("request", res.RequestID).Str("peer", from.String()).Logger()
@@ -43,10 +38,5 @@ func (n *Node) processRollCallResponse(ctx context.Context, from peer.ID, res re
 	// Record the response.
 	n.rollCall.add(res.RequestID, rres)
 
-	return nil
-}
-
-func (n *Node) processInstallFunctionResponse(ctx context.Context, from peer.ID, res response.InstallFunction) error {
-	n.log.Trace().Str("from", from.String()).Str("cid", res.CID).Msg("function install response received")
 	return nil
 }
