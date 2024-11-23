@@ -73,10 +73,10 @@ func NewCore(log zerolog.Logger, host *host.Host, opts ...Option) *core {
 	}
 
 	core := &core{
-		cfg:  cfg,
-		log:  log,
-		host: host,
-		// tracer:   tracing.NewTracer(tracerName),
+		cfg:     cfg,
+		log:     log,
+		host:    host,
+		tracer:  tracing.NewTracer(tracerName),
 		metrics: metrics.Default(),
 		topics:  syncmap.New[string, topicInfo](),
 	}

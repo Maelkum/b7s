@@ -17,7 +17,7 @@ import (
 )
 
 type (
-	ProcessFunc func(ctx context.Context, from peer.ID, data []byte, pipeline Pipeline) error
+	ProcessFunc func(ctx context.Context, from peer.ID, typ string, payload []byte) error
 )
 
 // Run will start the main loop for the node.
@@ -101,7 +101,7 @@ func (c *core) Run(ctx context.Context, process ProcessFunc) error {
 
 					c.metrics.IncrCounterWithLabels(topicMessagesMetric, 1, []metrics.Label{{Name: "topic", Value: name}})
 
-					err = process(ctx, msg.ReceivedFrom, msg.GetData(), PubSubPipeline(name))
+					err = c.processMessage(ctx, msg.ReceivedFrom, msg.GetData(), PubSubPipeline(name), process)
 					if err != nil {
 						c.log.Error().Err(err).Str("id", msg.ID).Str("peer", msg.ReceivedFrom.String()).Msg("could not process message")
 						return
@@ -142,7 +142,7 @@ func (c *core) listenDirectMessages(ctx context.Context, process ProcessFunc) {
 
 		c.log.Trace().Stringer("peer", from).Msg("received direct message")
 
-		err = process(ctx, from, msg, DirectMessagePipeline)
+		err = c.processMessage(ctx, from, msg, DirectMessagePipeline, process)
 		if err != nil {
 			c.log.Error().Err(err).Str("peer", from.String()).Msg("could not process direct message")
 			return

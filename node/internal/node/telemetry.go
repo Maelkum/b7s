@@ -76,3 +76,21 @@ func (c *messageSpanConfig) spanOpts() []trace.SpanStartOption {
 		trace.WithAttributes(attrs...),
 	}
 }
+
+func msgProcessSpanOpts(from peer.ID, msgType string, pipeline Pipeline) []trace.SpanStartOption {
+
+	attrs := []attribute.KeyValue{
+		b7ssemconv.MessagePeer.String(from.String()),
+		b7ssemconv.MessageType.String(msgType),
+		b7ssemconv.MessagePipeline.String(pipeline.ID.String()),
+	}
+
+	if pipeline.ID == PubSub {
+		attrs = append(attrs, b7ssemconv.MessageTopic.String(pipeline.Topic))
+	}
+
+	return []trace.SpanStartOption{
+		trace.WithSpanKind(trace.SpanKindConsumer),
+		trace.WithAttributes(attrs...),
+	}
+}

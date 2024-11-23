@@ -6,6 +6,12 @@ import (
 	"github.com/blocklessnetwork/b7s/models/blockless"
 )
 
+const (
+	tracerName = "b7s.Node"
+
+	allowErrorLeakToTelemetry = false // By default we will not send processing errors to telemetry tracers.
+)
+
 // Option can be used to set Node configuration options.
 type Option func(*Config)
 

@@ -89,5 +89,5 @@ func (w *Worker) Run(ctx context.Context) error {
 	// Start the function sync in the background to periodically check functions.
 	go w.runSyncLoop(ctx)
 
-	return w.Core.Run(ctx, w.processMessage)
+	return w.Core.Run(ctx, w.process)
 }
