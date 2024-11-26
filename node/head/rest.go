@@ -1,38 +1,37 @@
-package node
+package head
 
 import (
 	"context"
 	"crypto/sha256"
 	"fmt"
 
+	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/models/codes"
 	"github.com/blocklessnetwork/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s/models/request"
 )
 
 // ExecuteFunction can be used to start function execution. At the moment this is used by the API server to start execution on the head node.
-func (n *Node) ExecuteFunction(ctx context.Context, req execute.Request, subgroup string) (codes.Code, string, execute.ResultMap, execute.Cluster, error) {
-
-	if !n.isHead() {
-		return codes.NotAvailable, "", nil, execute.Cluster{}, fmt.Errorf("action not supported on this node type")
-	}
+func (h *HeadNode) ExecuteFunction(ctx context.Context, req execute.Request, subgroup string) (codes.Code, string, execute.ResultMap, execute.Cluster, error) {
 
 	requestID := newRequestID()
-	code, results, cluster, err := n.headExecute(ctx, requestID, req, subgroup)
+
+	code, results, cluster, err := h.execute(ctx, requestID, req, subgroup)
 	if err != nil {
-		n.log.Error().Str("request", requestID).Err(err).Msg("execution failed")
+		h.Log().Error().Str("request", requestID).Err(err).Msg("execution failed")
 	}
 
 	return code, requestID, results, cluster, nil
 }
 
 // ExecutionResult fetches the execution result from the node cache.
-func (n *Node) ExecutionResult(id string) (execute.ResultMap, bool) {
-	return n.executeResponses.Get(id)
+func (h *HeadNode) ExecutionResult(id string) (execute.ResultMap, bool) {
+	// TBD: Head node currently does not cache results.
+	return nil, false
 }
 
 // PublishFunctionInstall publishes a function install message.
-func (n *Node) PublishFunctionInstall(ctx context.Context, uri string, cid string, subgroup string) error {
+func (h *HeadNode) PublishFunctionInstall(ctx context.Context, uri string, cid string, subgroup string) error {
 
 	var req request.InstallFunction
 	if uri != "" {
@@ -46,12 +45,12 @@ func (n *Node) PublishFunctionInstall(ctx context.Context, uri string, cid strin
 	}
 
 	if subgroup == "" {
-		subgroup = DefaultTopic
+		subgroup = blockless.DefaultTopic
 	}
 
-	n.log.Debug().Str("subgroup", subgroup).Str("url", req.ManifestURL).Str("cid", req.CID).Msg("publishing function install message")
+	h.Log().Debug().Str("subgroup", subgroup).Str("url", req.ManifestURL).Str("cid", req.CID).Msg("publishing function install message")
 
-	err := n.publishToTopic(ctx, subgroup, &req)
+	err := h.PublishToTopic(ctx, subgroup, &req)
 	if err != nil {
 		return fmt.Errorf("could not publish message: %w", err)
 	}
@@ -97,4 +96,9 @@ func deriveCIDFromURI(uri string) (string, error) {
 	cid := fmt.Sprintf("%x", h.Sum(nil))
 
 	return cid, nil
+}
+
+// TODO: Move to a different package.
+func manifestURLFromCID(cid string) string {
+	return fmt.Sprintf("https://%s.ipfs.w3s.link/manifest.json", cid)
 }
