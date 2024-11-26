@@ -8,9 +8,6 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/network"
-	"github.com/libp2p/go-libp2p/core/peer"
-	"github.com/libp2p/go-libp2p/core/peerstore"
-	"github.com/multiformats/go-multiaddr"
 	"github.com/stretchr/testify/require"
 
 	"github.com/blocklessnetwork/b7s/host"
@@ -95,29 +92,6 @@ func createNode(t *testing.T, role blockless.NodeRole) *Node {
 	require.NoError(t, err)
 
 	return node
-}
-
-func hostAddNewPeer(t *testing.T, host *host.Host, newPeer *host.Host) {
-	t.Helper()
-
-	info := hostGetAddrInfo(t, newPeer)
-	host.Peerstore().AddAddrs(info.ID, info.Addrs, peerstore.PermanentAddrTTL)
-}
-
-func hostGetAddrInfo(t *testing.T, host *host.Host) *peer.AddrInfo {
-
-	addresses := host.Addresses()
-	require.NotEmpty(t, addresses)
-
-	addr := addresses[0]
-
-	maddr, err := multiaddr.NewMultiaddr(addr)
-	require.NoError(t, err)
-
-	info, err := peer.AddrInfoFromP2pAddr(maddr)
-	require.NoError(t, err)
-
-	return info
 }
 
 func getStreamPayload(t *testing.T, stream network.Stream, output any) {

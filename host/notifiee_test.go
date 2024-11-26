@@ -1,4 +1,4 @@
-package node
+package host_test
 
 import (
 	"context"
@@ -8,18 +8,15 @@ import (
 
 	"github.com/blocklessnetwork/b7s/host"
 	"github.com/blocklessnetwork/b7s/models/blockless"
+	"github.com/blocklessnetwork/b7s/testing/helpers"
 	"github.com/blocklessnetwork/b7s/testing/mocks"
 )
 
-func TestNode_Notifiee(t *testing.T) {
+const (
+	loopback = "127.0.0.1"
+)
 
-	var (
-		logger          = mocks.NoopLogger
-		functionHandler = mocks.BaselineFStore(t)
-	)
-
-	server, err := host.New(mocks.NoopLogger, loopback, 0)
-	require.NoError(t, err)
+func TestNotifiee(t *testing.T) {
 
 	var (
 		storedPeer bool
@@ -32,15 +29,18 @@ func TestNode_Notifiee(t *testing.T) {
 		return nil
 	}
 
-	node, err := New(logger, server, store, functionHandler, WithRole(blockless.HeadNode))
+	server, err := host.New(mocks.NoopLogger, loopback, 0)
 	require.NoError(t, err)
+
+	notifiee := host.NewNotifee(mocks.NoopLogger, store)
+	server.Network().Notify(notifiee)
 
 	client, err := host.New(mocks.NoopLogger, loopback, 0)
 	require.NoError(t, err)
 
-	hostAddNewPeer(t, client, node.host)
+	helpers.HostAddNewPeer(t, client, server)
 
-	serverInfo := hostGetAddrInfo(t, server)
+	serverInfo := helpers.HostGetAddrInfo(t, server)
 	err = client.Connect(context.Background(), *serverInfo)
 	require.NoError(t, err)
 

@@ -4,13 +4,6 @@ import (
 	"github.com/armon/go-metrics/prometheus"
 )
 
-// Tracing span names.
-const (
-	// notifiee events
-	spanPeerConnected    = "PeerConnected"
-	spanPeerDisconnected = "PeerDisconnected"
-)
-
 var (
 	subscriptionsMetric = []string{"node", "topic", "subscriptions"}
 )

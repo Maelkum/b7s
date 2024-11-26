@@ -23,6 +23,7 @@ import (
 	"github.com/blocklessnetwork/b7s/executor"
 	"github.com/blocklessnetwork/b7s/executor/limits"
 	"github.com/blocklessnetwork/b7s/fstore"
+	b7shost "github.com/blocklessnetwork/b7s/host"
 	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/node"
 	"github.com/blocklessnetwork/b7s/store"
@@ -201,6 +202,11 @@ func run() int {
 		return failure
 	}
 	defer host.Close()
+
+	host.Network().Notify(b7shost.NewNotifee(
+		log.With().Str("component", "notifiee").Logger(),
+		store,
+	))
 
 	log.Info().
 		Str("id", host.ID().String()).

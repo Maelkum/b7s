@@ -1,4 +1,4 @@
-package node
+package host
 
 import (
 	"context"
@@ -14,15 +14,15 @@ import (
 	"github.com/blocklessnetwork/b7s/telemetry/tracing"
 )
 
-type connectionNotifiee struct {
+type Notifiee struct {
 	log    zerolog.Logger
 	store  blockless.PeerStore
 	tracer *tracing.Tracer
 }
 
-func newConnectionNotifee(log zerolog.Logger, store blockless.PeerStore) *connectionNotifiee {
+func NewNotifee(log zerolog.Logger, store blockless.PeerStore) *Notifiee {
 
-	cn := connectionNotifiee{
+	cn := Notifiee{
 		log:    log.With().Str("component", "notifiee").Logger(),
 		store:  store,
 		tracer: tracing.NewTracer("b7s.Notifiee"),
@@ -31,7 +31,7 @@ func newConnectionNotifee(log zerolog.Logger, store blockless.PeerStore) *connec
 	return &cn
 }
 
-func (n *connectionNotifiee) Connected(network network.Network, conn network.Conn) {
+func (n *Notifiee) Connected(network network.Network, conn network.Conn) {
 
 	ctx, span := n.tracer.Start(context.Background(), spanPeerConnected, connectionTraceOpts(conn)...)
 	defer span.End()
@@ -69,7 +69,7 @@ func (n *connectionNotifiee) Connected(network network.Network, conn network.Con
 	}
 }
 
-func (n *connectionNotifiee) Disconnected(_ network.Network, conn network.Conn) {
+func (n *Notifiee) Disconnected(_ network.Network, conn network.Conn) {
 
 	_, span := n.tracer.Start(context.Background(), spanPeerDisconnected, connectionTraceOpts(conn)...)
 	defer span.End()
@@ -85,11 +85,11 @@ func (n *connectionNotifiee) Disconnected(_ network.Network, conn network.Conn) 
 		Msg("peer disconnected")
 }
 
-func (n *connectionNotifiee) Listen(_ network.Network, _ multiaddr.Multiaddr) {
+func (n *Notifiee) Listen(_ network.Network, _ multiaddr.Multiaddr) {
 	// Noop
 }
 
-func (n *connectionNotifiee) ListenClose(_ network.Network, _ multiaddr.Multiaddr) {
+func (n *Notifiee) ListenClose(_ network.Network, _ multiaddr.Multiaddr) {
 	// Noop
 }
 
