@@ -6,7 +6,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 
 	"github.com/blocklessnetwork/b7s/models/blockless"
-	"github.com/blocklessnetwork/b7s/node/internal/node"
+	"github.com/blocklessnetwork/b7s/node"
 )
 
 // TODO: Perhaps create a map: message ID => handler

@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/armon/go-metrics"
+
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
 	"github.com/blocklessnetwork/b7s/info"
 	"github.com/blocklessnetwork/b7s/models/blockless"
 	"github.com/blocklessnetwork/b7s/models/execute"
-	"github.com/blocklessnetwork/b7s/node/internal/node"
+	"github.com/blocklessnetwork/b7s/node"
 	"github.com/blocklessnetwork/b7s/node/internal/syncmap"
 	"github.com/blocklessnetwork/b7s/node/internal/waitmap"
 )

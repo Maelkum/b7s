@@ -37,22 +37,22 @@ func (c Config) Valid() error {
 	return err.ErrorOrNil()
 }
 
-// WithWorkspace specifies the workspace that the node can use for file storage.
-func WithWorkspace(path string) Option {
+// Workspace specifies the workspace that the node can use for file storage.
+func Workspace(path string) Option {
 	return func(cfg *Config) {
 		cfg.Workspace = path
 	}
 }
 
-// WithAttributeLoading specifies whether node should try to load its attributes data from IPFS.
-func WithAttributeLoading(b bool) Option {
+// AttributeLoading specifies whether node should try to load its attributes data from IPFS.
+func AttributeLoading(b bool) Option {
 	return func(cfg *Config) {
 		cfg.LoadAttributes = b
 	}
 }
 
-// WithMetadataProvider sets the metadata provider for the node.
-func WithMetadataProvider(p metadata.Provider) Option {
+// MetadataProvider sets the metadata provider for the node.
+func MetadataProvider(p metadata.Provider) Option {
 	return func(cfg *Config) {
 		cfg.MetadataProvider = p
 	}
