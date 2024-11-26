@@ -49,10 +49,13 @@ func New(core node.Core, fstore FStore, executor blockless.Executor, options ...
 	// TODO: Tracing
 
 	worker := &Worker{
-		Core:     core,
-		fstore:   fstore,
-		executor: executor,
-		clusters: syncmap.New[string, consensusExecutor](),
+		Core: core,
+		cfg:  cfg,
+
+		fstore:           fstore,
+		executor:         executor,
+		clusters:         syncmap.New[string, consensusExecutor](),
+		executeResponses: waitmap.New[string, execute.NodeResult](1000),
 	}
 
 	if cfg.LoadAttributes {

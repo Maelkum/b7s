@@ -211,13 +211,9 @@ func run() int {
 		Strs("boot_nodes", cfg.BootNodes).
 		Msg("created host")
 
-		// If we have topics specified, use those.
 	// Ensure default topic is included in the topic list.
-	if len(cfg.Topics) > 0 {
-
-		if !slices.Contains(cfg.Topics, blockless.DefaultTopic) {
-			cfg.Topics = append(cfg.Topics, blockless.DefaultTopic)
-		}
+	if !slices.Contains(cfg.Topics, blockless.DefaultTopic) {
+		cfg.Topics = append(cfg.Topics, blockless.DefaultTopic)
 	}
 
 	// Instantiate node.

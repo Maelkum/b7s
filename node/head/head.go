@@ -1,6 +1,7 @@
 package head
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/armon/go-metrics"
@@ -55,6 +56,10 @@ func New(core node.Core, options ...Option) (*HeadNode, error) {
 		})
 
 	return head, nil
+}
+
+func (h *HeadNode) Run(ctx context.Context) error {
+	return h.Core.Run(ctx, h.process)
 }
 
 func newRequestID() string {

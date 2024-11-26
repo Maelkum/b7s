@@ -23,15 +23,20 @@ type (
 // Run will start the main loop for the node.
 func (c *core) Run(ctx context.Context, process ProcessFunc) error {
 
-	topics := c.topics.Keys()
+	err := c.host.InitPubSub(ctx)
+	if err != nil {
+		return fmt.Errorf("coould not initialize pubsub: %w", err)
+	}
+
+	topics := c.cfg.Topics
 	for _, topic := range topics {
-		err := c.Subscribe(ctx, topic)
+		err = c.Subscribe(ctx, topic)
 		if err != nil {
 			return fmt.Errorf("could not subscribe to topic (topic: %s): %w", topic, err)
 		}
 	}
 
-	err := c.host.ConnectToKnownPeers(ctx)
+	err = c.host.ConnectToKnownPeers(ctx)
 	if err != nil {
 		return fmt.Errorf("could not connect to known peers: %w", err)
 	}

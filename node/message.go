@@ -20,11 +20,6 @@ type topicInfo struct {
 
 func (c *core) Subscribe(ctx context.Context, topic string) error {
 
-	err := c.host.InitPubSub(ctx)
-	if err != nil {
-		return fmt.Errorf("coould not initialize pubsub: %w", err)
-	}
-
 	c.metrics.IncrCounter(subscriptionsMetric, 1)
 
 	h, sub, err := c.host.Subscribe(topic)

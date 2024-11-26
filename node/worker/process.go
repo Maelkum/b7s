@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
@@ -25,8 +26,8 @@ func (w *Worker) process(ctx context.Context, from peer.ID, msg string, payload 
 		return node.HandleMessage(ctx, from, payload, w.processFormCluster)
 	case blockless.MessageDisbandCluster:
 		return node.HandleMessage(ctx, from, payload, w.processDisbandCluster)
-
-	default:
-		return nil
 	}
+
+	return fmt.Errorf("unsupported message: %s", msg)
+
 }
