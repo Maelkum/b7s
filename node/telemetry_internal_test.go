@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/response"
-	"github.com/blessnetwork/b7s/telemetry"
-	"github.com/blessnetwork/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/response"
+	"github.com/Maelkum/b7s/telemetry"
+	"github.com/Maelkum/b7s/testing/helpers"
 )
 
 func TestTelemetry_SaveTraceContext(t *testing.T) {

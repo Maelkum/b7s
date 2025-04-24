@@ -3,7 +3,7 @@ package main
 import (
 	"strings"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 func parseNodeRole(role string) bls.NodeRole {

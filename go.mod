@@ -1,4 +1,4 @@
-module github.com/blessnetwork/b7s
+module github.com/Maelkum/b7s
 
 go 1.23.2
 

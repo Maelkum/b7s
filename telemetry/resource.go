@@ -9,8 +9,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/telemetry/b7ssemconv"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/telemetry/b7ssemconv"
 )
 
 func CreateResource(ctx context.Context, id string, role bls.NodeRole) (*resource.Resource, error) {

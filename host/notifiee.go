@@ -9,9 +9,9 @@ import (
 	"github.com/rs/zerolog"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/telemetry/b7ssemconv"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/telemetry/b7ssemconv"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 type Notifiee struct {

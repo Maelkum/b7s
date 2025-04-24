@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 const (

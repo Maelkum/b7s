@@ -19,11 +19,11 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/protocol"
 
-	"github.com/blessnetwork/b7s/consensus"
-	"github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/telemetry/b7ssemconv"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/consensus"
+	"github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/telemetry/b7ssemconv"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 // TODO (pbft): Request timestamp - execution exactly once, prevent multiple/out of order executions.

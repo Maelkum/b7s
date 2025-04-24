@@ -7,7 +7,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 
-	"github.com/blessnetwork/b7s/telemetry"
+	"github.com/Maelkum/b7s/telemetry"
 )
 
 func CreateTracerProvider(t *testing.T, resource *resource.Resource) (*tracetest.InMemoryExporter, *trace.TracerProvider) {

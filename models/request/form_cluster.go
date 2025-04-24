@@ -5,10 +5,10 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/consensus"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/response"
+	"github.com/Maelkum/b7s/consensus"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/response"
 )
 
 var _ (json.Marshaler) = (*FormCluster)(nil)

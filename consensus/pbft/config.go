@@ -5,9 +5,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/metadata"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/metadata"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 // Option can be used to set PBFT configuration options.

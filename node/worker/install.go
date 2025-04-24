@@ -6,8 +6,8 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/request"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/request"
 )
 
 func (w *Worker) processInstallFunction(ctx context.Context, from peer.ID, req request.InstallFunction) error {

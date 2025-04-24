@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/models/response"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/response"
 )
 
 type WorkOrder struct {

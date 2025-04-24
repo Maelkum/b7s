@@ -8,7 +8,7 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/libp2p/go-libp2p/core/protocol"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 // SendMessage sends a message directly to the specified peer, on the standard bls protocol.

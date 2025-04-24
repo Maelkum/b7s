@@ -1,7 +1,7 @@
 package bls
 
 import (
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 type Message interface {

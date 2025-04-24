@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
-	"github.com/blessnetwork/b7s/metadata"
+	"github.com/Maelkum/b7s/metadata"
 )
 
 // Option can be used to set Node configuration options.

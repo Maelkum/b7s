@@ -10,7 +10,7 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 type topicInfo struct {

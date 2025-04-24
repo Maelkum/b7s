@@ -8,11 +8,11 @@ import (
 	"github.com/armon/go-metrics"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/models/response"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/response"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 // Execute fullfils the consensus interface by inserting the request into the pipeline.

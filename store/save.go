@@ -6,7 +6,7 @@ import (
 
 	"github.com/cockroachdb/pebble"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 func (s *Store) SavePeer(_ context.Context, peer bls.Peer) error {

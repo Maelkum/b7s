@@ -8,9 +8,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/api"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/api"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestAPI_ExecutionResult(t *testing.T) {

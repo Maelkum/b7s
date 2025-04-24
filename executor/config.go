@@ -4,7 +4,7 @@ import (
 	"github.com/armon/go-metrics"
 	"github.com/spf13/afero"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 // defaultConfig used to create Executor.

@@ -10,11 +10,11 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/blessnetwork/b7s/consensus"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/models/request"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/consensus"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/request"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 func (w *Worker) processWorkOrder(ctx context.Context, from peer.ID, req request.WorkOrder) error {

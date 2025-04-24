@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 // createCmd will create the command to be executed, prepare working directory, environment, standard input and all else.

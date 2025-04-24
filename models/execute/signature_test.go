@@ -3,7 +3,7 @@ package execute
 import (
 	"testing"
 
-	"github.com/blessnetwork/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/codes"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/stretchr/testify/require"
 )

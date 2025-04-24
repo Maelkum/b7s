@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/raft"
 	"github.com/rs/zerolog"
 
-	"github.com/blessnetwork/b7s/log/hclog"
+	"github.com/Maelkum/b7s/log/hclog"
 )
 
 // Option can be used to set Raft configuration options.

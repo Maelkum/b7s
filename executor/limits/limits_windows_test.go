@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sys/windows"
 
-	"github.com/blessnetwork/b7s/executor/limits"
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/executor/limits"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 func TestLimits(t *testing.T) {

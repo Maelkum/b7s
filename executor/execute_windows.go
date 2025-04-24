@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/sys/windows"
 
-	"github.com/blessnetwork/b7s/executor/internal/process"
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/executor/internal/process"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 // executeCommand on Windows contains some dark sorcery. On Windows, the `rusage` equivalent does not include

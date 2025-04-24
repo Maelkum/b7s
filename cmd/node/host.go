@@ -5,9 +5,9 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/blessnetwork/b7s/config"
-	"github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/config"
+	"github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 func createHost(log zerolog.Logger, cfg config.Config, role bls.NodeRole, dialbackPeers ...bls.Peer) (*host.Host, error) {

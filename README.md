@@ -1,6 +1,6 @@
 [![Coverage](https://img.shields.io/badge/Coverage-64.5%25-yellow)](https://img.shields.io/badge/Coverage-64.5%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/blessnetwork/b7s)](https://goreportcard.com/report/github.com/blessnetwork/b7s) 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/blessnetwork/b7s/blob/main/LICENSE.md) 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Maelkum/b7s/blob/main/LICENSE.md) 
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/blessnetwork/b7s)](https://img.shields.io/github/v/release/blessnetwork/b7s)
 
 
@@ -156,17 +156,17 @@ flowchart TD
     CLI -->|"commands"| Head
 
     %% Click Events
-    click API "https://github.com/blessnetwork/b7s/tree/main/api/"
-    click PBFT "https://github.com/blessnetwork/b7s/tree/main/consensus/pbft/"
-    click Raft "https://github.com/blessnetwork/b7s/tree/main/consensus/raft/"
-    click Head "https://github.com/blessnetwork/b7s/tree/main/node/"
-    click Worker "https://github.com/blessnetwork/b7s/tree/main/node/"
-    click Host "https://github.com/blessnetwork/b7s/tree/main/host/"
-    click Executor "https://github.com/blessnetwork/b7s/tree/main/executor/"
-    click FStore "https://github.com/blessnetwork/b7s/tree/main/fstore/"
-    click Store "https://github.com/blessnetwork/b7s/tree/main/store/"
-    click Crypto "https://github.com/blessnetwork/b7s/tree/main/crypto/"
-    click CLI "https://github.com/blessnetwork/b7s/tree/main/cmd/"
+    click API "https://github.com/Maelkum/b7s/tree/main/api/"
+    click PBFT "https://github.com/Maelkum/b7s/tree/main/consensus/pbft/"
+    click Raft "https://github.com/Maelkum/b7s/tree/main/consensus/raft/"
+    click Head "https://github.com/Maelkum/b7s/tree/main/node/"
+    click Worker "https://github.com/Maelkum/b7s/tree/main/node/"
+    click Host "https://github.com/Maelkum/b7s/tree/main/host/"
+    click Executor "https://github.com/Maelkum/b7s/tree/main/executor/"
+    click FStore "https://github.com/Maelkum/b7s/tree/main/fstore/"
+    click Store "https://github.com/Maelkum/b7s/tree/main/store/"
+    click Crypto "https://github.com/Maelkum/b7s/tree/main/crypto/"
+    click CLI "https://github.com/Maelkum/b7s/tree/main/cmd/"
 
     %% Styles
     classDef external fill:#fefefe,stroke:#333,stroke-width:2px;

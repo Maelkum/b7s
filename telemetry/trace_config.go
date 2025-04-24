@@ -3,7 +3,7 @@ package telemetry
 import (
 	"time"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 var DefaultTraceConfig = TraceConfig{

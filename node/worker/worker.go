@@ -6,12 +6,12 @@ import (
 
 	"github.com/armon/go-metrics"
 
-	"github.com/blessnetwork/b7s/info"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/node"
-	"github.com/blessnetwork/b7s/node/internal/syncmap"
-	"github.com/blessnetwork/b7s/node/internal/waitmap"
+	"github.com/Maelkum/b7s/info"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/node"
+	"github.com/Maelkum/b7s/node/internal/syncmap"
+	"github.com/Maelkum/b7s/node/internal/waitmap"
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
 )
 

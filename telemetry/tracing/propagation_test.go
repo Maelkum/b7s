@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/telemetry"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
-	"github.com/blessnetwork/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/telemetry"
+	"github.com/Maelkum/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/testing/helpers"
 )
 
 func TestTraceInfo(t *testing.T) {

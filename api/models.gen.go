@@ -4,8 +4,8 @@
 package api
 
 import (
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/node/aggregate"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/node/aggregate"
 )
 
 // AggregatedResult Result of an Execution Request

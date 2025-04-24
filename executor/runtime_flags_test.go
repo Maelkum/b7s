@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 func TestRuntimeFlags(t *testing.T) {

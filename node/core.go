@@ -7,10 +7,10 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/rs/zerolog"
 
-	"github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/node/internal/syncmap"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/node/internal/syncmap"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 type Core interface {

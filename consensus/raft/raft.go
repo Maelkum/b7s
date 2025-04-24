@@ -15,9 +15,9 @@ import (
 	libp2praft "github.com/libp2p/go-libp2p-raft"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/consensus"
-	"github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/consensus"
+	"github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 type Replica struct {

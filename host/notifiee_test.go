@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/testing/helpers"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 const (

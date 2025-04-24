@@ -18,15 +18,15 @@ import (
 	"github.com/ziflex/lecho/v3"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 
-	"github.com/blessnetwork/b7s/api"
-	"github.com/blessnetwork/b7s/config"
-	b7shost "github.com/blessnetwork/b7s/host"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/node"
-	"github.com/blessnetwork/b7s/store"
-	"github.com/blessnetwork/b7s/store/codec"
-	"github.com/blessnetwork/b7s/store/traceable"
-	"github.com/blessnetwork/b7s/telemetry"
+	"github.com/Maelkum/b7s/api"
+	"github.com/Maelkum/b7s/config"
+	b7shost "github.com/Maelkum/b7s/host"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/node"
+	"github.com/Maelkum/b7s/store"
+	"github.com/Maelkum/b7s/store/codec"
+	"github.com/Maelkum/b7s/store/traceable"
+	"github.com/Maelkum/b7s/telemetry"
 )
 
 const (

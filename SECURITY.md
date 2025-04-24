@@ -4,7 +4,7 @@
 
 At Bless Network, we take security very seriously. If you discover any security vulnerabilities, we encourage you to report them responsibly.
 
-Please report any security issues to our Security Advisories page: [Bless Network Security Advisories](https://github.com/blessnetwork/b7s/security/advisories)
+Please report any security issues to our Security Advisories page: [Bless Network Security Advisories](https://github.com/Maelkum/b7s/security/advisories)
 
 ### Guidelines for Reporting
 

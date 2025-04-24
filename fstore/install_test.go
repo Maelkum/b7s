@@ -15,12 +15,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/fstore"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/store"
-	"github.com/blessnetwork/b7s/store/codec"
-	"github.com/blessnetwork/b7s/testing/helpers"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/fstore"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/store"
+	"github.com/Maelkum/b7s/store/codec"
+	"github.com/Maelkum/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestFunction_Install(t *testing.T) {

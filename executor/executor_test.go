@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/executor"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/executor"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestExecutor_Create(t *testing.T) {

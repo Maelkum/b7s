@@ -1,7 +1,7 @@
 package executor
 
 import (
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 type Limiter interface {

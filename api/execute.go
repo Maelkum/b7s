@@ -7,9 +7,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/node/aggregate"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/node/aggregate"
 )
 
 // ExecuteFunction implements the REST API endpoint for function execution.

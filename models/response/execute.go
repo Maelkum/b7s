@@ -3,9 +3,9 @@ package response
 import (
 	"encoding/json"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
 )
 
 var _ (json.Marshaler) = (*Execute)(nil)

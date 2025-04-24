@@ -3,7 +3,7 @@ package node
 import (
 	"fmt"
 
-	"github.com/blessnetwork/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/bls"
 )
 
 type PipelineID int

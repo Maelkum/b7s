@@ -9,7 +9,7 @@ import (
 	dto "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/telemetry"
+	"github.com/Maelkum/b7s/telemetry"
 )
 
 func TestTelemetry_Metrics(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestExecute_CreateCMD(t *testing.T) {

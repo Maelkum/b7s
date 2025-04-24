@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestFunction_UnpackArchive(t *testing.T) {

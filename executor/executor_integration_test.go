@@ -16,12 +16,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 
-	"github.com/blessnetwork/b7s/executor"
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/telemetry"
-	"github.com/blessnetwork/b7s/testing/helpers"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/executor"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/telemetry"
+	"github.com/Maelkum/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 const (

@@ -3,9 +3,9 @@ package response
 import (
 	"encoding/json"
 
-	"github.com/blessnetwork/b7s/consensus"
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/codes"
+	"github.com/Maelkum/b7s/consensus"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/codes"
 )
 
 var _ (json.Marshaler) = (*FormCluster)(nil)

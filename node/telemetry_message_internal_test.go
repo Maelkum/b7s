@@ -14,13 +14,13 @@ import (
 	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/request"
-	"github.com/blessnetwork/b7s/models/response"
-	"github.com/blessnetwork/b7s/telemetry"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
-	"github.com/blessnetwork/b7s/testing/helpers"
-	"github.com/blessnetwork/b7s/testing/mocks"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/request"
+	"github.com/Maelkum/b7s/models/response"
+	"github.com/Maelkum/b7s/telemetry"
+	"github.com/Maelkum/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/testing/helpers"
+	"github.com/Maelkum/b7s/testing/mocks"
 )
 
 func TestNode_TraceHealthCheck(t *testing.T) {

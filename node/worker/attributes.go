@@ -10,8 +10,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/models/execute"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/models/execute"
 	"github.com/blocklessnetwork/b7s-attributes/attributes"
 )
 

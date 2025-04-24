@@ -6,8 +6,8 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/blessnetwork/b7s/models/bls"
-	"github.com/blessnetwork/b7s/node"
+	"github.com/Maelkum/b7s/models/bls"
+	"github.com/Maelkum/b7s/node"
 )
 
 // processMessage will determine which message was received and how to process it.

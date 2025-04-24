@@ -8,9 +8,9 @@ import (
 	"github.com/armon/go-metrics"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/blessnetwork/b7s/models/codes"
-	"github.com/blessnetwork/b7s/models/execute"
-	"github.com/blessnetwork/b7s/telemetry/tracing"
+	"github.com/Maelkum/b7s/models/codes"
+	"github.com/Maelkum/b7s/models/execute"
+	"github.com/Maelkum/b7s/telemetry/tracing"
 )
 
 // ExecuteFunction will run the Bless function defined by the execution request.
